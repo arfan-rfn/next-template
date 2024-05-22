@@ -36,13 +36,13 @@ export function Footer() {
 
 					{Object.entries(siteConfig.footer.links).map(([key, value]: any) => (
 						<div key={key} className="w-full p-4 sm:w-1/3 md:w-1/5" >
-							<h2 className="mb-2 text-lg text-start font-semibold">{key}</h2>
+							<h2 className="mb-2 text-start text-lg font-semibold">{key}</h2>
 							<ul className="list-none">
 								{value.map(({ name, url }: any, i: Number) =>
 									<li key={`${name}-${i}`} className='py-1'>
 										<Link
 											href={url}
-											className={cn(buttonVariants({ variant: 'link' }), 'font-light px-0')}
+											className={cn(buttonVariants({ variant: 'link' }), 'px-0 font-light')}
 										>
 											{name}
 										</Link>
