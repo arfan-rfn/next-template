@@ -1,7 +1,7 @@
 export type SiteConfig = typeof siteConfig
 
 export const siteConfig = {
-  name: "Next.js",
+  name: "Next Template",
   description:
     "Beautifully designed components built with Radix UI and Tailwind CSS.",
   mainNav: [
@@ -15,4 +15,34 @@ export const siteConfig = {
     github: "https://github.com/shadcn/ui",
     docs: "https://ui.shadcn.com",
   },
+  // Icon must be exist in the component/icons.tsx file
+  socials: [
+    {
+      name: "GitHub",
+      url: "https://github.com/arfan-rfn/next-template",
+      icon: "GitHub",
+    },
+  ],
+  footer: {
+    links: {
+      Features: [
+        {
+          name: "Home",
+          url: "/",
+        },
+      ],
+      Resources: [
+        {
+          name: "FAQ",
+          url: "/",
+        },
+      ],
+      About: [
+        {
+          name: "Contact",
+          url: "/",
+        },
+      ],
+    },
+  }
 }
