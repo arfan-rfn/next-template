@@ -18,12 +18,12 @@ export function Footer() {
 						</div>
 						<ul className="my-2 list-none">
 
-							<li className='mt-2 flex items-center justify-start'>
+							<li className='mt-2 flex items-center justify-start mx-2'>
 								{siteConfig.socials.map(({ name, url, icon }) => {
 									const SocialIcon = Icons[icon as keyof typeof Icons];
 									return (
 										<Link href={url} key={name} className='mr-4 opacity-70 hover:opacity-100'>
-											<SocialIcon />
+											<SocialIcon className="size-5"/>
 											<span className="sr-only">{name}</span>
 										</Link>
 									);
