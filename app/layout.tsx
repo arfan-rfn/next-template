@@ -7,6 +7,9 @@ import { cn } from "@/lib/utils"
 import { SiteHeader } from "@/components/site-header"
 import { TailwindIndicator } from "@/components/tailwind-indicator"
 import { ThemeProvider } from "@/components/theme-provider"
+import { Suspense } from "react"
+import GoogleAnalytics from "@/components/google-analytics"
+import { getSEOTags } from "@/lib/seo"
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -17,11 +20,9 @@ export const viewport: Viewport = {
   ],
 }
 
-export const metadata: Metadata = {
-  title: {
-    default: siteConfig.name,
-    template: `%s - ${siteConfig.name}`,
-  },
+export const metadata: Metadata = getSEOTags({
+  title: siteConfig.name,
+  relativeUrl: "/",
   description: siteConfig.description,
   icons: {
     icon: "/favicon.ico",
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   manifest: `/manifest.json`,
-}
+})
 
 interface RootLayoutProps {
   children: React.ReactNode
@@ -52,6 +53,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
               <div className="flex-1">{children}</div>
             </div>
             <TailwindIndicator />
+            <Suspense>
+              <GoogleAnalytics />
+            </Suspense>
           </ThemeProvider>
         </body>
       </html>

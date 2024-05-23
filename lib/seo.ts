@@ -6,6 +6,7 @@ interface SEOTagsParams extends Metadata {
 	description: string;
 	relativeUrl: string;
 	imageUrl?: string;
+	[key: string]: any;
 }
 
 export function getSEOTags(seoTags: SEOTagsParams): Metadata {
