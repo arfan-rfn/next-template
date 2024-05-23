@@ -17,7 +17,7 @@ export function getSEOTags(seoTags: SEOTagsParams): Metadata {
 	const fullUrl = `${baseUrl}${relativeUrl}`;
 
 	return {
-		metadataBase: new URL(fullUrl),
+		metadataBase: fullUrl ? new URL(fullUrl) : null,
 		alternates: {
 			canonical: fullUrl,
 		},
