@@ -18,7 +18,7 @@ export default function Error({
 	}, [error])
 
 	return (
-		<div className="flex flex-col h-96 justify-center items-center gap-6">
+		<div className="flex h-96 flex-col items-center justify-center gap-6">
 			<h2 className="text-xl font-semibold">
 				Something went wrong!
 			</h2>

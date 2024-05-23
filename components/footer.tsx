@@ -18,7 +18,7 @@ export function Footer() {
 						</div>
 						<ul className="my-2 list-none">
 
-							<li className='mt-2 flex items-center justify-start mx-2'>
+							<li className='mx-2 mt-2 flex items-center justify-start'>
 								{siteConfig.socials.map(({ name, url, icon }) => {
 									const SocialIcon = Icons[icon as keyof typeof Icons];
 									return (

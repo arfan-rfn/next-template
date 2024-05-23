@@ -28,7 +28,7 @@ export default function PrivacyPolicy() {
 				Last updated: {LastUpdate}
 			</p>
 
-			<p className="font-semibold text-center text-lg">
+			<p className="text-center text-lg font-semibold">
 				**This is a sample privacy policy generated with AI. Please replace this with your own privacy policy.**
 			</p>
 

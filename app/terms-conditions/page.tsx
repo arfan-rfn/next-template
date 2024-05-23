@@ -27,7 +27,7 @@ export default function TermsAndCondition() {
 				Last updated: {LastUpdate}
 			</p>
 
-			<p className="font-semibold text-center text-lg">
+			<p className="text-center text-lg font-semibold">
 				**This is a sample Terms and Condition generated with AI. Please replace this with your own Terms and Condition.**
 			</p>
 			<div className="m-4">
