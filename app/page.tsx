@@ -22,10 +22,9 @@ export default function IndexPage() {
   return (
     <>
       <JsonLd data={jsonLd} />
-      <main className="h-screen">
+      <main>
         <Hero />
       </main>
-      <Footer />
     </>
   )
 }

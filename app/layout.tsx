@@ -10,6 +10,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Suspense } from "react"
 import GoogleAnalytics from "@/components/google-analytics"
 import { getSEOTags } from "@/lib/seo"
+import { Footer } from "@/components/footer"
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -51,6 +52,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
             <div className="relative flex min-h-screen flex-col">
               <SiteHeader />
               <div className="flex-1">{children}</div>
+              <Footer />
             </div>
             <TailwindIndicator />
             <Suspense>

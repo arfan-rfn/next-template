@@ -12,7 +12,7 @@ export const siteConfig = {
   ],
   links: {
     twitter: "https://twitter.com/shadcn",
-    github: "https://github.com/shadcn/ui",
+    github: "https://github.com/arfan-rfn/next-template",
     docs: "https://ui.shadcn.com",
   },
   // Icon must be exist in the component/icons.tsx file
@@ -36,6 +36,14 @@ export const siteConfig = {
           name: "FAQ",
           url: "/",
         },
+        {
+          name: "Terms and Conditions",
+          url: "/terms-conditions",
+        },
+        {
+          name: "Privacy Policy",
+          url: "/privacy-policy",
+        }
       ],
       About: [
         {
