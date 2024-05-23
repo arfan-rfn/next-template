@@ -1,5 +1,6 @@
 "use client"
 
+import { env } from "@/env.mjs"
 import { pageView } from "@/lib/analytics-event"
 import { usePathname, useSearchParams } from "next/navigation"
 import Script from "next/script"
@@ -8,7 +9,7 @@ import { useEffect } from "react"
 export default function GoogleAnalytics() {
 	const pathname = usePathname()
 	const searchParams = useSearchParams()
-	const GTM_ID = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
+	const GTM_ID = env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
 
 	useEffect(() => {
 		if (pathname) {

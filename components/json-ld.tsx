@@ -1,3 +1,4 @@
+import { env } from "@/env.mjs";
 
 type SchemaType = {
 	data: {
@@ -11,7 +12,7 @@ type SchemaType = {
 
 export function JsonLd({ data }: SchemaType) {
 	const { imageUrl, relativeUrl } = data;
-	const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+	const baseUrl = env.NEXT_PUBLIC_BASE_URL;
 	const fullUrl = `${baseUrl}${relativeUrl}`;
 	const jsonLd = {
 		"@context": "http://schema.org",

@@ -1,5 +1,6 @@
 
 import { siteConfig } from "@/config/site";
+import { env } from "@/env.mjs";
 import { getSEOTags } from "@/lib/seo";
 
 const CHATGPT_PROMPT = `
@@ -15,7 +16,7 @@ export const metadata = getSEOTags({
 export default function TermsAndCondition() {
 	const LastUpdate = "May 22, 2024";
 	const ApplicationName = siteConfig.name;
-	const WebsiteURL = process.env.NEXT_PUBLIC_BASE_URL;
+	const WebsiteURL = env.NEXT_PUBLIC_BASE_URL;
 
 	return (
 		<section className="container my-4">

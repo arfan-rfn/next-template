@@ -1,3 +1,4 @@
+import { env } from "@/env.mjs";
 import { Metadata } from "next"
 
 
@@ -11,7 +12,7 @@ interface SEOTagsParams extends Metadata {
 
 export function getSEOTags(seoTags: SEOTagsParams): Metadata {
 	const { title, description, relativeUrl, imageUrl } = seoTags;
-	const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+	const baseUrl = env.NEXT_PUBLIC_BASE_URL;
 
 	// Ensure the canonical URL is absolute
 	const fullUrl = `${baseUrl}${relativeUrl}`;
