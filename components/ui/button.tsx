@@ -18,6 +18,7 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "underline-offset-4 hover:underline text-primary",
+        chip: "shadow-chip overflow-hidden border-0 bg-muted w-max hover:brightness-90",
       },
       size: {
         default: "h-10 py-2 px-4",
@@ -25,6 +26,7 @@ const buttonVariants = cva(
         lg: "h-11 px-8 rounded-md",
         icon: "h-10 w-10",
         text: "h-auto",
+        round: "h-8 px-3 rounded-full",
       },
     },
     defaultVariants: {

@@ -1,9 +1,10 @@
 import {
+  ChevronLeft,
+  ChevronRight,
   LucideIcon,
   LucideProps,
   Moon,
   SunMedium,
-  Twitter,
 } from "lucide-react"
 
 export type Icon = LucideIcon
@@ -11,7 +12,8 @@ export type Icon = LucideIcon
 export const Icons = {
   Sun: SunMedium,
   Moon: Moon,
-  Twitter: Twitter,
+  ChevronLeft: ChevronLeft,
+  ChevronRight: ChevronRight,
   Logo: (props: LucideProps) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" {...props}>
       <path
