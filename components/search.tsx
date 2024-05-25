@@ -82,8 +82,8 @@ export function Search({ ...props }: DialogProps) {
 										runCommand(() => router.push(navItem.href as string))
 									}}
 								>
-									<div className="mr-2 flex h-4 w-4 items-center justify-center">
-										<Icons.Circle className="h-3 w-3" />
+									<div className="mr-2 flex size-4 items-center justify-center">
+										<Icons.Circle className="size-3" />
 									</div>
 									{navItem.title}
 								</CommandItem>
@@ -93,15 +93,15 @@ export function Search({ ...props }: DialogProps) {
 					<CommandSeparator />
 					<CommandGroup heading="Theme">
 						<CommandItem onSelect={() => runCommand(() => setTheme("light"))}>
-							<Icons.Sun className="mr-2 h-4 w-4" />
+							<Icons.Sun className="mr-2 size-4" />
 							Light
 						</CommandItem>
 						<CommandItem onSelect={() => runCommand(() => setTheme("dark"))}>
-							<Icons.Moon className="mr-2 h-4 w-4" />
+							<Icons.Moon className="mr-2 size-4" />
 							Dark
 						</CommandItem>
 						<CommandItem onSelect={() => runCommand(() => setTheme("system"))}>
-							<Icons.System className="mr-2 h-4 w-4" />
+							<Icons.System className="mr-2 size-4" />
 							System
 						</CommandItem>
 					</CommandGroup>
