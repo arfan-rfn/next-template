@@ -4,6 +4,7 @@ import { z } from "zod";
 export const env = createEnv({
 	server: {
 		NODE_ENV: z.enum(["development", "test", "production"]),
+		MONGODB_URI: z.string().min(1),
 	},
 	client: {
 		NEXT_PUBLIC_GOOGLE_ANALYTICS_ID: z.string().min(1),
