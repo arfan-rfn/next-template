@@ -1,10 +1,8 @@
 import { siteConfig } from "@/config/site";
 import Link from "next/link";
-import { Button, buttonVariants } from "./ui/button";
+import { buttonVariants } from "./ui/button";
 import DotPattern from "./dot-pattern";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
-import { Icons } from "./icons";
 import { CodeBlocks } from "./code-blocks";
 
 export function Hero() {
