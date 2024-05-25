@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { siteConfig } from '@/config/site';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from './ui/button';
+import { ThemeToggle } from './theme-toggle';
 
 export function Footer() {
 	return (
@@ -23,7 +24,7 @@ export function Footer() {
 									const SocialIcon = Icons[icon as keyof typeof Icons];
 									return (
 										<Link href={url} key={name} className='mr-4 opacity-70 hover:opacity-100'>
-											<SocialIcon className="size-5"/>
+											<SocialIcon className="size-5" />
 											<span className="sr-only">{name}</span>
 										</Link>
 									);
@@ -53,9 +54,12 @@ export function Footer() {
 					))}
 
 				</div>
-				<p className="mt-4 text-xs">
-					&copy; {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
-				</p>
+				<div className='flex justify-between'>
+					<p className="mt-4 text-xs">
+						&copy; {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
+					</p>
+					<ThemeToggle />
+				</div>
 			</div>
 		</footer>
 	);
