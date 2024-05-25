@@ -1,7 +1,9 @@
 import {
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Circle,
+  Clipboard,
   Laptop,
   LucideIcon,
   LucideProps,
@@ -15,7 +17,9 @@ export type Icon = LucideIcon
 export const Icons = {
   Sun: SunMedium,
   Moon: Moon,
+  Copy: Clipboard,
   Circle: Circle,
+  Check: CheckCircle2,
   System: Laptop,
   ChevronLeft: ChevronLeft,
   ChevronRight: ChevronRight,

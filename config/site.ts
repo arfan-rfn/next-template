@@ -13,7 +13,6 @@ export const siteConfig = {
   links: {
     twitter: "https://twitter.com/shadcn",
     github: "https://github.com/arfan-rfn/next-template",
-    docs: "https://ui.shadcn.com",
   },
   // Icon must be exist in the component/icons.tsx file
   socials: [
