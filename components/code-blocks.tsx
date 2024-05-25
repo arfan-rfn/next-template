@@ -25,14 +25,8 @@ export function CodeBlocks({ code }: { code: string }) {
 				onClick={handleCopyClick}
 			>
 				{isCopied ? <Icons.Check className="size-4" /> : <Icons.Copy className="size-4" />}
-
+				<div className='sr-only'>copy</div>
 			</Button>
 		</pre>
-		// <div>
-		// 	<pre>
-		// 		<code>{code}</code>
-		// 	</pre>
-		// 	<button onClick={handleCopyClick}>{isCopied ? 'Copied!' : 'Copy'}</button>
-		// </div>
 	);
 };
