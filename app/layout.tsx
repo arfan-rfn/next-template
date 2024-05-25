@@ -11,6 +11,8 @@ import { Suspense } from "react"
 import GoogleAnalytics from "@/components/google-analytics"
 import { getSEOTags } from "@/lib/seo"
 import { Footer } from "@/components/footer"
+import { Toaster } from "@/components/ui/sonner"
+
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -58,6 +60,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
             <Suspense>
               <GoogleAnalytics />
             </Suspense>
+            <Toaster />
           </ThemeProvider>
         </body>
       </html>
