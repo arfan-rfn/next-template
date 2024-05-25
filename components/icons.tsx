@@ -1,8 +1,11 @@
 import {
   ChevronLeft,
   ChevronRight,
+  Circle,
+  Laptop,
   LucideIcon,
   LucideProps,
+  Menu,
   Moon,
   SunMedium,
 } from "lucide-react"
@@ -12,8 +15,11 @@ export type Icon = LucideIcon
 export const Icons = {
   Sun: SunMedium,
   Moon: Moon,
+  Circle: Circle,
+  System: Laptop,
   ChevronLeft: ChevronLeft,
   ChevronRight: ChevronRight,
+  Menu: Menu,
   Logo: (props: LucideProps) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" {...props}>
       <path
