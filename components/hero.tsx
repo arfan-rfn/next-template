@@ -9,10 +9,10 @@ import { CodeBlocks } from "./code-blocks";
 
 export function Hero() {
 	return (
-		<section className="container grid min-h-[55vh] grid-cols-1 items-center gap-6 lg:grid-cols-2 lg:min-h-[65vh] my-4">
+		<section className="container my-4 grid min-h-[55vh] grid-cols-1 items-center gap-6 lg:min-h-[65vh] lg:grid-cols-2">
 
 			<div className="grid items-center gap-6 pb-8 pt-6 md:py-10">
-				<div className="flex max-w-[980px] flex-col items-center text-center lg:text-start lg:items-start gap-2">
+				<div className="flex max-w-[980px] flex-col items-center gap-2 text-center lg:items-start lg:text-start">
 					<h1 className="text-4xl font-extrabold leading-snug tracking-tight md:text-5xl">
 						Beautifully designed components <br className="hidden sm:inline" />
 						built with Radix UI and Tailwind CSS.
@@ -22,7 +22,7 @@ export function Hero() {
 						into your apps. Free. Open Source. And Next.js 13 Ready.
 					</p>
 				</div>
-				<div className="flex gap-4 justify-center lg:justify-start">
+				<div className="flex justify-center gap-4 lg:justify-start">
 					<Link
 						href={siteConfig.links.github}
 						target="_blank"

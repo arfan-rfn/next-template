@@ -17,7 +17,7 @@ export function CodeBlocks({ code }: { code: string }) {
 
 
 	return (
-		<pre onClick={handleCopyClick} className="flex cursor-pointer justify-between items-center bg-gray-900 rounded-md p-4 text-gray-400 font-mono overflow-x-hidden">
+		<pre onClick={handleCopyClick} className="flex cursor-pointer items-center justify-between overflow-x-hidden rounded-md bg-gray-900 p-4 font-mono text-gray-400">
 			<code className='truncate'>npx create-next-app -e https://github.com/arfan-rfn/next-template</code>
 			<Button
 				variant="ghost"
