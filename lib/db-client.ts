@@ -1,11 +1,11 @@
+'use server';
+
 import { env } from "@/env.mjs"
 import { MongoClient } from "mongodb"
 
 let cached: MongoClient | null = null;
 const uri = env.MONGODB_URI;
 const options = {
-	useNewUrlParser: true,
-	useUnifiedTopology: true,
 	maxPoolSize: 100, // Pool size of 100 connections
 	connectTimeoutMS: 10000, // 10 seconds
 };
