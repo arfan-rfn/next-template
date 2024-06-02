@@ -22,6 +22,10 @@ export function Footer() {
 							<li className='mx-2 mt-2 flex items-center justify-start'>
 								{siteConfig.socials.map(({ name, url, icon }) => {
 									const SocialIcon = Icons[icon as keyof typeof Icons];
+									if (!SocialIcon){
+										console.error(`ERROR: Icon ${icon} not found in Icons. Hiding social link ${name} in footer`);
+										return null;
+									}
 									return (
 										<Link href={url} key={name} className='mr-4 opacity-70 hover:opacity-100'>
 											<SocialIcon className="size-5" />
