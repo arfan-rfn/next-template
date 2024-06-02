@@ -7,7 +7,7 @@ import { CodeBlocks } from "./code-blocks";
 
 export function Hero() {
 	return (
-		<section className="container my-4 grid min-h-[55vh] grid-cols-1 items-center gap-6 lg:min-h-[65vh] lg:grid-cols-2">
+		<section className="my-4 grid min-h-[55vh] grid-cols-1 items-center gap-6 lg:min-h-[65vh] lg:grid-cols-2">
 
 			<div className="grid items-center gap-6 pb-8 pt-6 md:py-10">
 				<div className="flex max-w-[980px] flex-col items-center gap-2 text-center lg:items-start lg:text-start">
