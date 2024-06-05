@@ -10,6 +10,7 @@ import { Suspense } from "react"
 import GoogleAnalytics from "@/components/google-analytics"
 import { getSEOTags } from "@/lib/seo"
 import { Toaster } from "@/components/ui/sonner"
+import QueryProviders from "@/components/query-provider"
 
 
 export const viewport: Viewport = {
@@ -49,14 +50,16 @@ export default function RootLayout({ children }: RootLayoutProps) {
           )}
         >
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <div className="relative flex min-h-screen flex-col bg-background">
-              {children}
-            </div>
-            <TailwindIndicator />
+            <QueryProviders>
+              <div className="relative flex min-h-screen flex-col bg-background">
+                {children}
+              </div>
+              <Toaster />
+              <TailwindIndicator />
+            </QueryProviders>
             <Suspense>
               <GoogleAnalytics />
             </Suspense>
-            <Toaster />
           </ThemeProvider>
         </body>
       </html>
