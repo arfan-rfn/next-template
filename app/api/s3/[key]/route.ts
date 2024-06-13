@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getS3Object, getS3SrcByKey } from "../get-image-by-key";
 
+// NOTE: make sure to update next.config.js with the correct routes after deployment
 async function _s3StreamResponse(key: string) {
 	const { Body, ContentType } = await getS3Object(key);
 

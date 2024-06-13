@@ -1,3 +1,4 @@
+import { env } from "@/env.mjs"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -16,4 +17,11 @@ export function toSentenceCase(str: string) {
   return str
     .replace(/([A-Z])/g, " $1")
     .replace(/^./, (str) => str.toUpperCase())
+}
+
+export function getBaseURL() {
+  if (process.env.NODE_ENV === 'development') {
+    return '';
+  }
+  return env.NEXT_PUBLIC_BASE_URL;
 }
