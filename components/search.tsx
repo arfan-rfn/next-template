@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { DialogProps } from "@radix-ui/react-alert-dialog"
+import { AlertDialogProps } from "@radix-ui/react-alert-dialog"
 import { useTheme } from "next-themes"
 import { Icons } from "./icons"
 
@@ -20,7 +20,7 @@ import {
 } from "./ui/command"
 import { Button } from "./ui/button"
 
-export function Search({ ...props }: DialogProps) {
+export function Search({ ...props }: AlertDialogProps) {
 	const router = useRouter()
 	const [open, setOpen] = React.useState(false)
 	const { setTheme } = useTheme()

@@ -1,3 +1,4 @@
+'use client'
 import { useTestData } from "./_utils/use-test-data";
 
 export function TestPage() {
