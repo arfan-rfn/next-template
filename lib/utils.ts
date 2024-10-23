@@ -1,4 +1,4 @@
-import { env } from "@/env.mjs"
+import { env } from "@/env"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 

@@ -1,5 +1,5 @@
 import { siteConfig } from "@/config/site";
-import { env } from "@/env.mjs";
+import { env } from "@/env";
 import { getSEOTags } from "@/lib/seo";
 
 

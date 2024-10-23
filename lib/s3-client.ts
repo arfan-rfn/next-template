@@ -1,4 +1,4 @@
-import { env } from "@/env.mjs";
+import { env } from "@/env";
 import { S3Client } from "@aws-sdk/client-s3";
 
 const BUCKET = env.AWS_BUCKET_NAME;

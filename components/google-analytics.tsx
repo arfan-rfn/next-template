@@ -1,6 +1,6 @@
 "use client"
 
-import { env } from "@/env.mjs"
+import { env } from "@/env"
 import { pageView } from "@/lib/analytics-event"
 import { usePathname, useSearchParams } from "next/navigation"
 import Script from "next/script"
