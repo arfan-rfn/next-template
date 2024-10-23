@@ -16,15 +16,16 @@ async function _s3StreamResponse(key: string) {
 }
 
 type GetOptions = {
-	params: {
+	params: Promise<{
 		key: string;
-	};
+	}>;
 }
 
-export async function GET(_: NextRequest, { params }: GetOptions) {
-	// return s3StreamResponse(params.key);
-	const src = await getS3SrcByKey(params.key, {
+export async function GET(_: NextRequest, props: GetOptions) {
+    const params = await props.params;
+    // return s3StreamResponse(params.key);
+    const src = await getS3SrcByKey(params.key, {
 		expiresIn: 60 * 60,
 	});
-	return NextResponse.json({ src });
+    return NextResponse.json({ src });
 }
