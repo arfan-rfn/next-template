@@ -11,6 +11,7 @@ import GoogleAnalytics from "@/components/google-analytics"
 import { getSEOTags } from "@/lib/seo"
 import { Toaster } from "@/components/ui/sonner"
 import QueryProviders from "@/components/query-provider"
+import { SupabaseProvider } from '@/components/providers/supabase-provider'
 
 
 export const viewport: Viewport = {
@@ -49,18 +50,20 @@ export default function RootLayout({ children }: RootLayoutProps) {
             fontSans.variable
           )}
         >
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <QueryProviders>
-              <div className="relative flex min-h-screen flex-col bg-background">
-                {children}
-              </div>
-              <Toaster />
-              <TailwindIndicator />
-            </QueryProviders>
-            <Suspense>
-              <GoogleAnalytics />
-            </Suspense>
-          </ThemeProvider>
+          <SupabaseProvider>
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+              <QueryProviders>
+                <div className="relative flex min-h-screen flex-col bg-background">
+                  {children}
+                </div>
+                <Toaster />
+                <TailwindIndicator />
+              </QueryProviders>
+              <Suspense>
+                <GoogleAnalytics />
+              </Suspense>
+            </ThemeProvider>
+          </SupabaseProvider>
         </body>
       </html>
     </>
