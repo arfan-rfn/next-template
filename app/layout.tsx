@@ -11,6 +11,8 @@ import GoogleAnalytics from "@/components/google-analytics"
 import { getSEOTags } from "@/lib/seo"
 import { Toaster } from "@/components/ui/sonner"
 import QueryProviders from "@/components/query-provider"
+import { JsonLd } from "@/components/json-ld"
+
 
 
 export const viewport: Viewport = {
@@ -51,6 +53,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         >
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <QueryProviders>
+              <JsonLd />
               <div className="relative flex min-h-screen flex-col bg-background">
                 {children}
               </div>
