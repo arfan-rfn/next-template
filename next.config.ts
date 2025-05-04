@@ -2,15 +2,22 @@
 
 // /** @type {import('next').NextConfig} */
 
-import { fileURLToPath } from "node:url";
+import createMDX from '@next/mdx'
 
 const nextConfig = {
   reactStrictMode: true,
+  pageExtensions: ["mdx", "ts", "tsx"],
   images: {
     remotePatterns: [{
       hostname: "*.amazonaws.com"
     }],
   },
+  experimental: {
+    mdxRs: true,
+    viewTransition: true
+  },
 }
 
-export default nextConfig
+const withMDX = createMDX({})
+
+export default withMDX(nextConfig)
