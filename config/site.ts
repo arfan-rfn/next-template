@@ -11,7 +11,7 @@ export const siteConfig = {
     },
     {
       title: "Blog",
-      href: "/blog/stack",
+      href: "/blog",
     }
   ],
   links: {
