@@ -48,11 +48,19 @@ export const siteConfig = {
           url: "/privacy-policy",
         }
       ],
-      About: [
+      "Links": [
         {
-          name: "Contact",
-          url: "/",
+          name: "Build by Arfan",
+          url: "https://arfanu.com",
         },
+        {
+          name: "Connecto",
+          url: "https://getconnecto.app",
+        },
+        {
+          name: "NextJS Template",
+          url: "https://nextjs.arfanu.com",
+        }
       ],
     },
   }
