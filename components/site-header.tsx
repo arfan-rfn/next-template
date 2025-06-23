@@ -20,19 +20,12 @@ export function SiteHeader() {
           </div>
           <nav className="flex items-center space-x-1">
             <Link
-              href={siteConfig.links.github}
-              target="_blank"
-              rel="noreferrer"
+              href="/auth/sign-in"
+              className={buttonVariants({
+                variant: "default",
+              })}
             >
-              <div
-                className={buttonVariants({
-                  size: "icon",
-                  variant: "ghost",
-                })}
-              >
-                <Icons.GitHub className="size-5" />
-                <span className="sr-only">GitHub</span>
-              </div>
+              Sign In
             </Link>
           </nav>
         </div>

@@ -6,6 +6,7 @@ import { fontSans } from "@/lib/fonts"
 import { cn } from "@/lib/utils"
 import { TailwindIndicator } from "@/components/tailwind-indicator"
 import { ThemeProvider } from "@/components/theme-provider"
+import { AuthProvider } from "@/components/auth-provider"
 import { Suspense } from "react"
 import GoogleAnalytics from "@/components/google-analytics"
 import { getSEOTags } from "@/lib/seo"
@@ -53,12 +54,14 @@ export default function RootLayout({ children }: RootLayoutProps) {
         >
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <QueryProviders>
-              <JsonLd />
-              <div className="relative flex min-h-screen flex-col bg-background">
-                {children}
-              </div>
-              <Toaster />
-              <TailwindIndicator />
+              <AuthProvider>
+                <JsonLd />
+                <div className="relative flex min-h-screen flex-col bg-background">
+                  {children}
+                </div>
+                <Toaster />
+                <TailwindIndicator />
+              </AuthProvider>
             </QueryProviders>
             <Suspense>
               <GoogleAnalytics />
