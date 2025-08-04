@@ -9,7 +9,7 @@ const nextConfig = {
   pageExtensions: ["mdx", "ts", "tsx"],
   images: {
     remotePatterns: [{
-      hostname: "*.amazonaws.com"
+      hostname: "*"
     }],
   },
   experimental: {

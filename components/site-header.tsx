@@ -2,6 +2,7 @@ import Link from "next/link"
 
 import { siteConfig } from "@/config/site"
 import { buttonVariants } from "@/components/ui/button"
+import { AccountButton } from "@/components/account-button"
 import { Icons } from "@/components/icons"
 import { MainNav } from "@/components/main-nav"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -19,14 +20,7 @@ export function SiteHeader() {
             <Search />
           </div>
           <nav className="flex items-center space-x-1">
-            <Link
-              href="/auth/sign-in"
-              className={buttonVariants({
-                variant: "default",
-              })}
-            >
-              Sign In
-            </Link>
+            <AccountButton />
           </nav>
         </div>
       </div>
