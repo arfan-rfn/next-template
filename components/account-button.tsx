@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils"
  * Responsive and accessible.
  */
 export function AccountButton() {
-	const { user, isAuthenticated, isLoading, signOut } = useAuthContext()
+	const { user, isAuthenticated, isLoading, signOut, refresh } = useAuthContext()
 	const router = useRouter()
 
 	// Helper: get avatar URL or fallback
@@ -62,6 +62,10 @@ export function AccountButton() {
 	// Handle sign out
 	const handleSignOut = async () => {
 		await signOut()
+		// Manual refresh as fallback in case session listener doesn't work
+		setTimeout(() => {
+			refresh()
+		}, 100)
 		router.push("/auth/sign-in")
 	}
 

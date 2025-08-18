@@ -9,9 +9,11 @@ import { toast } from "sonner"
 import { env } from "@/env"
 import { parse, deserialize } from 'superjson'
 import { auth } from "@/lib/auth"
+import { useAuthContext } from "@/components/auth-provider"
 
 export default function SignInPage() {
 	const router = useRouter()
+	const { refresh } = useAuthContext()
 	const [isLoading, setIsLoading] = useState(false)
 	const [formData, setFormData] = useState({
 		email: "",
@@ -26,6 +28,10 @@ export default function SignInPage() {
 				callbackURL: 'http://localhost:3000/dashboard',
 
 			})
+			// Refresh auth state after successful Google sign-in
+			setTimeout(() => {
+				refresh()
+			}, 500)
 		} catch (error) {
 			console.error("Google sign-in error:", error)
 			toast.error("Failed to sign in with Google")
@@ -50,6 +56,10 @@ export default function SignInPage() {
 			}, {
 				onSuccess: (ctx) => {
 					toast.success("Signed in successfully!")
+					// Refresh auth state after successful email sign-in
+					setTimeout(() => {
+						refresh()
+					}, 100)
 					router.push("/dashboard")
 				},
 				onError: () => {

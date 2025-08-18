@@ -12,6 +12,7 @@ interface AuthContextType {
   signIn: any
   signUp: any
   signOut: any
+  refresh: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
