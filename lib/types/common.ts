@@ -8,6 +8,14 @@ export interface BaseResponse {
   message: string
 }
 
+// SuperJSON response wrapper type
+export interface SuperJSONResponse<T = any> {
+  json: T
+  meta?: {
+    values?: Record<string, string[]>
+  }
+}
+
 export interface PaginationParams {
   page: number
   limit: number

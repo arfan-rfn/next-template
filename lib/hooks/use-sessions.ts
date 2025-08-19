@@ -10,20 +10,25 @@ import type { BaseResponse } from '@/lib/types/common'
 // Session-related types
 export interface DeviceSession {
   id: string
-  userId: string
-  userAgent: string
+  createdAt: Date
+  expiresAt: Date
+  lastActiveAt: Date
   ipAddress: string
-  location?: string
-  createdAt: string
-  lastAccessed: string
   isCurrent: boolean
-  deviceType: string
-  browser: string
+  device: {
+    type: string
+    os: string
+    model?: string
+  }
+  browser: {
+    name: string
+    version: string
+  }
 }
 
 export interface SessionsResponse {
   sessions: DeviceSession[]
-  total: number
+  count: number
 }
 
 // Query Keys

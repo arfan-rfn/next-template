@@ -44,15 +44,14 @@ export default function DeviceSettingsPage() {
     revokeAllOtherSessionsMutation.mutate()
   }
 
-  const getDeviceIcon = (userAgent: string) => {
-    if (userAgent.includes("iPhone") || userAgent.includes("Android")) {
+  const getDeviceIcon = (device: { type: string, os: string }) => {
+    if (device.type === "mobile" || device.os.toLowerCase().includes("ios") || device.os.toLowerCase().includes("android")) {
       return Icons.Smartphone
     }
     return Icons.Monitor
   }
 
-  const formatLastAccessed = (dateString: string) => {
-    const date = new Date(dateString)
+  const formatLastAccessed = (date: Date) => {
     const now = new Date()
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60))
 
@@ -107,16 +106,16 @@ export default function DeviceSettingsPage() {
             <>
               <div className="space-y-4">
                 {sessions.map((session) => {
-                  const DeviceIcon = getDeviceIcon(session.userAgent)
+                  const DeviceIcon = getDeviceIcon(session.device)
                   return (
                     <div key={session.id} className="flex items-start space-x-4 p-4 border rounded-lg">
                       <DeviceIcon className="size-8 text-muted-foreground mt-1" />
                       <div className="flex-1 space-y-2">
                         <div className="flex items-center gap-2">
                           <h4 className="font-medium">
-                            {session.userAgent.includes("iPhone") ? "iPhone" :
-                             session.userAgent.includes("Android") ? "Android Device" :
-                             "Desktop Browser"}
+                            {session.device.os.includes("iOS") ? "iPhone" :
+                             session.device.os.includes("Android") ? "Android Device" :
+                             `${session.browser.name} on ${session.device.os}`}
                           </h4>
                           {session.isCurrent && (
                             <Badge variant="secondary" className="text-xs">
@@ -127,11 +126,11 @@ export default function DeviceSettingsPage() {
                         <div className="text-sm text-muted-foreground space-y-1">
                           <div className="flex items-center gap-1">
                             <Icons.Clock className="size-3" />
-                            Last active: {formatLastAccessed(session.lastAccessed)}
+                            Last active: {formatLastAccessed(session.lastActiveAt)}
                           </div>
                           <div className="flex items-center gap-1">
                             <Icons.Location className="size-3" />
-                            {session.location} • {session.ipAddress}
+                            {session.browser.name} {session.browser.version} • {session.ipAddress || "Unknown location"}
                           </div>
                         </div>
                       </div>

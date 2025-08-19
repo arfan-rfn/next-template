@@ -3,6 +3,8 @@
  * Supports Next.js fetch extensions for caching and revalidation
  */
 
+import superjson from 'superjson'
+
 class APIError extends Error {
   constructor(
     message: string,
@@ -22,7 +24,20 @@ async function handleResponse<T>(response: Response): Promise<T> {
 
   const contentType = response.headers.get('content-type')
   if (contentType && contentType.includes('application/json')) {
-    return response.json()
+    const jsonText = await response.text()
+    try {
+      // Try to parse as SuperJSON first
+      const parsed = JSON.parse(jsonText)
+      // Check if it's a SuperJSON response (has json and meta properties)
+      if (parsed && typeof parsed === 'object' && 'json' in parsed && 'meta' in parsed) {
+        return superjson.deserialize(parsed)
+      }
+      // Fall back to regular JSON parsing for non-SuperJSON responses
+      return parsed
+    } catch (error) {
+      // If JSON parsing fails, return the text
+      return jsonText as unknown as T
+    }
   }
   
   return response.text() as unknown as T
