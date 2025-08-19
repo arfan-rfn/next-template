@@ -4,6 +4,7 @@
  */
 
 import superjson from 'superjson'
+import { env } from '@/env'
 
 class APIError extends Error {
   constructor(
@@ -39,7 +40,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
       return jsonText as unknown as T
     }
   }
-  
+
   return response.text() as unknown as T
 }
 
@@ -54,7 +55,7 @@ interface FetchOptions extends Omit<RequestInit, 'method' | 'body'> {
   cache?: 'force-cache' | 'no-store' | 'no-cache' | 'reload' | 'only-if-cached'
 }
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL || ''
+const baseURL = env.NEXT_PUBLIC_API_URL
 
 // Default options that can be overridden
 const defaultOptions: FetchOptions = {

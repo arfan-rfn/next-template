@@ -11,12 +11,6 @@ const settingsNav = [
     href: "/settings/account",
     icon: Icons.User,
     description: "Profile and account management"
-  },
-  {
-    title: "Devices",
-    href: "/settings/devices", 
-    icon: Icons.Monitor,
-    description: "Manage your active sessions"
   }
 ]
 
@@ -33,7 +27,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
         <div className="space-y-2">
           <h1 className="text-3xl font-bold">Settings</h1>
           <p className="text-muted-foreground">
-            Manage your account and device preferences.
+            Manage your account preferences.
           </p>
         </div>
 
