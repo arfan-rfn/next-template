@@ -5,13 +5,11 @@ import { siteConfig } from "@/config/site"
 import { fontSans } from "@/lib/fonts"
 import { cn } from "@/lib/utils"
 import { TailwindIndicator } from "@/components/tailwind-indicator"
-import { ThemeProvider } from "@/components/theme-provider"
-import { AuthProvider } from "@/components/auth-provider"
 import { Suspense } from "react"
 import GoogleAnalytics from "@/components/google-analytics"
 import { getSEOTags } from "@/lib/seo"
 import { Toaster } from "@/components/ui/sonner"
-import QueryProviders from "@/components/query-provider"
+import Providers from "@/components/providers"
 import { JsonLd } from "@/components/json-ld"
 
 
@@ -50,21 +48,17 @@ export default function RootLayout({ children }: RootLayoutProps) {
           className={`min-h-screen bg-background font-sans antialiased ${fontSans.variable}`}
           suppressHydrationWarning
         >
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <QueryProviders>
-              <AuthProvider>
-                <JsonLd />
-                <div className="relative flex min-h-screen flex-col bg-background">
-                  {children}
-                </div>
-                <Toaster />
-                <TailwindIndicator />
-              </AuthProvider>
-            </QueryProviders>
+          <Providers>
+            <JsonLd />
+            <div className="relative flex min-h-screen flex-col bg-background">
+              {children}
+            </div>
+            <Toaster />
+            <TailwindIndicator />
             <Suspense>
               <GoogleAnalytics />
             </Suspense>
-          </ThemeProvider>
+          </Providers>
         </body>
       </html>
     </>

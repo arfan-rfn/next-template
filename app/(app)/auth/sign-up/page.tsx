@@ -8,7 +8,7 @@ import { Icons } from "@/components/icons"
 import { auth } from "@/lib/auth"
 import { toast } from "sonner"
 import { useAuthConfig } from "@/lib/hooks/use-auth-config"
-import { useAuthContext } from "@/components/auth-provider"
+import { useAuthContext } from "@/components/providers/auth-provider"
 
 export default function SignUpPage() {
   const router = useRouter()

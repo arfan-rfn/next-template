@@ -1,6 +1,5 @@
 import { QUERY_KEYS } from "@/config/query-keys";
-import { getQueryClient } from "@/lib/query-client";
-import { dehydrate, useQuery } from "@tanstack/react-query";
+import { QueryClient, dehydrate, useQuery } from "@tanstack/react-query";
 
 const fetchData = async () => {
 	// NOTE: This is a placeholder function that would be replaced with a real API call
@@ -20,7 +19,7 @@ export const useTestData = () => {
 };
 
 export const prefetchTestData = async () => {
-	const queryClient = getQueryClient();
+	const queryClient = new QueryClient();
 	await queryClient.prefetchQuery(queryOptions());
 	const dehydratedState = dehydrate(queryClient);
 	return { dehydratedState, queryClient };

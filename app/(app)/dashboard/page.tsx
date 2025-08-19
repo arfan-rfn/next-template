@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { auth } from "@/lib/auth"
-import { useAuth } from "@/lib/use-auth"
+import { useAuth } from "@/lib/hooks/use-auth"
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";

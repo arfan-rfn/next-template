@@ -1,6 +1,6 @@
 "use client"
 
-import { useAuthContext } from "@/components/auth-provider"
+import { useAuthContext } from "@/components/providers/auth-provider"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -17,28 +17,18 @@ import {
   AlertDialogTrigger
 } from "@/components/ui/alert-dialog"
 import { Icons } from "@/components/icons"
-import { useState, useEffect } from "react"
-import { toast } from "sonner"
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-
-interface DeviceSession {
-  id: string
-  userId: string
-  userAgent: string
-  ipAddress: string
-  location?: string
-  createdAt: string
-  lastAccessed: string
-  isCurrent: boolean
-  deviceType: string
-  browser: string
-}
+import { useSessions, useRevokeSession, useRevokeAllOtherSessions } from "@/lib/hooks/use-sessions"
 
 export default function DeviceSettingsPage() {
-  const { user, isAuthenticated, isLoading } = useAuthContext()
+  const { isAuthenticated, isLoading } = useAuthContext()
   const router = useRouter()
-  const [sessions, setSessions] = useState<DeviceSession[]>([])
-  const [loadingSessions, setLoadingSessions] = useState(true)
+  
+  // TanStack Query hooks
+  const { data: sessions = [], isLoading: loadingSessions } = useSessions()
+  const revokeSessionMutation = useRevokeSession()
+  const revokeAllOtherSessionsMutation = useRevokeAllOtherSessions()
 
   useEffect(() => {
     if (!isAuthenticated && !isLoading) {
@@ -46,67 +36,12 @@ export default function DeviceSettingsPage() {
     }
   }, [isAuthenticated, isLoading, router])
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      loadSessions()
-    }
-  }, [isAuthenticated])
-
-  const loadSessions = async () => {
-    try {
-      setLoadingSessions(true)
-      // Replace with your actual backend API endpoint
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/session`, {
-        credentials: 'include',
-      })
-      if (!response.ok) {
-        throw new Error("Failed to fetch sessions")
-      }
-      const data = await response.json()
-      console.log(data)
-      if (data.sessions) {
-        setSessions(data.sessions)
-      }
-    } catch (error) {
-      console.error("Failed to load sessions:", error)
-      toast.error("Failed to load device sessions")
-    } finally {
-      setLoadingSessions(false)
-    }
+  const handleRevokeSession = (sessionId: string) => {
+    revokeSessionMutation.mutate(sessionId)
   }
 
-  const handleRevokeSession = async (sessionId: string) => {
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/session/${sessionId}`, {
-        method: "DELETE",
-        credentials: 'include', // Include cookies for authentication
-      })
-      if (!response.ok) {
-        throw new Error("Failed to revoke session")
-      }
-      setSessions(sessions.filter(s => s.id !== sessionId))
-      toast.success("Device session revoked successfully")
-    } catch (error) {
-      console.error("Failed to revoke session:", error)
-      toast.error("Failed to revoke session")
-    }
-  }
-
-  const handleRevokeAllOtherSessions = async () => {
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/session`, {
-        method: "DELETE",
-        credentials: 'include', // Include cookies for authentication
-      })
-      if (!response.ok) {
-        throw new Error("Failed to revoke other sessions")
-      }
-      setSessions(sessions.filter(s => s.isCurrent))
-      toast.success("All other sessions revoked successfully")
-    } catch (error) {
-      console.error("Failed to revoke other sessions:", error)
-      toast.error("Failed to revoke other sessions")
-    }
+  const handleRevokeAllOtherSessions = () => {
+    revokeAllOtherSessionsMutation.mutate()
   }
 
   const getDeviceIcon = (userAgent: string) => {

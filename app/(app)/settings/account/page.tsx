@@ -1,6 +1,6 @@
 "use client"
 
-import { useAuthContext } from "@/components/auth-provider"
+import { useAuthContext } from "@/components/providers/auth-provider"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -17,25 +17,19 @@ import {
   AlertDialogTrigger 
 } from "@/components/ui/alert-dialog"
 import { Icons } from "@/components/icons"
-import { useState, useEffect } from "react"
-import { toast } from "sonner"
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-
-interface NotificationSettings {
-  emailMarketing: boolean
-  emailSecurity: boolean
-  emailProduct: boolean
-}
+import { useNotifications, useUpdateNotificationSetting } from "@/lib/hooks/use-notifications"
+import { useDeleteAccount } from "@/lib/hooks/use-account"
 
 export default function AccountSettingsPage() {
   const { user, isAuthenticated, isLoading } = useAuthContext()
   const router = useRouter()
-  const [notifications, setNotifications] = useState<NotificationSettings>({
-    emailMarketing: false,
-    emailSecurity: true,
-    emailProduct: true,
-  })
-  const [loadingNotifications, setLoadingNotifications] = useState(false)
+  
+  // TanStack Query hooks
+  const { data: notifications, isLoading: loadingNotifications } = useNotifications()
+  const updateNotificationSetting = useUpdateNotificationSetting()
+  const deleteAccountMutation = useDeleteAccount()
 
   useEffect(() => {
     if (!isAuthenticated && !isLoading) {
@@ -43,88 +37,12 @@ export default function AccountSettingsPage() {
     }
   }, [isAuthenticated, isLoading, router])
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      loadNotificationSettings()
-    }
-  }, [isAuthenticated])
-
-  const loadNotificationSettings = async () => {
-    try {
-      // Replace with your actual backend API endpoint
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/notifications`, {
-        credentials: 'include', // Include cookies for authentication
-      })
-      if (!response.ok) {
-        throw new Error("Failed to fetch notification settings")
-      }
-      const data = await response.json()
-      setNotifications({
-        emailMarketing: data.preferences.emailMarketing,
-        emailSecurity: data.preferences.emailSecurity,
-        emailProduct: data.preferences.emailProduct,
-      })
-    } catch (error) {
-      console.error("Failed to load notification settings:", error)
-      toast.error("Failed to load notification preferences")
-    }
+  const handleNotificationChange = (key: 'emailSecurity' | 'emailProduct' | 'emailMarketing', value: boolean) => {
+    updateNotificationSetting(key, value)
   }
 
-  const handleNotificationChange = async (key: keyof NotificationSettings, value: boolean) => {
-    try {
-      setLoadingNotifications(true)
-      const updatedNotifications = { ...notifications, [key]: value }
-      setNotifications(updatedNotifications)
-      
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/notifications`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: 'include', // Include cookies for authentication
-        body: JSON.stringify({
-          preferences: updatedNotifications
-        }),
-      })
-      
-      if (!response.ok) {
-        throw new Error("Failed to update notifications")
-      }
-      
-      toast.success("Notification preferences updated")
-    } catch (error) {
-      console.error("Failed to update notifications:", error)
-      toast.error("Failed to update notification preferences")
-      // Revert the change on error
-      setNotifications(prev => ({ ...prev, [key]: !value }))
-    } finally {
-      setLoadingNotifications(false)
-    }
-  }
-
-  const handleDeleteAccount = async () => {
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/delete-account`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: 'include', // Include cookies for authentication
-        body: JSON.stringify({
-          confirmation: true
-        }),
-      })
-      
-      if (!response.ok) {
-        throw new Error("Failed to request account deletion")
-      }
-      
-      const data = await response.json()
-      toast.success(data.message)
-    } catch (error) {
-      console.error("Failed to request account deletion:", error)
-      toast.error("Failed to request account deletion")
-    }
+  const handleDeleteAccount = () => {
+    deleteAccountMutation.mutate({ confirmation: true })
   }
 
   if (isLoading) {
@@ -254,7 +172,7 @@ export default function AccountSettingsPage() {
                 </p>
               </div>
               <Switch 
-                checked={notifications.emailSecurity}
+                checked={notifications?.emailSecurity ?? true}
                 onCheckedChange={(checked) => handleNotificationChange('emailSecurity', checked)}
                 disabled={loadingNotifications}
               />
@@ -270,7 +188,7 @@ export default function AccountSettingsPage() {
                 </p>
               </div>
               <Switch 
-                checked={notifications.emailProduct}
+                checked={notifications?.emailProduct ?? true}
                 onCheckedChange={(checked) => handleNotificationChange('emailProduct', checked)}
                 disabled={loadingNotifications}
               />
@@ -286,7 +204,7 @@ export default function AccountSettingsPage() {
                 </p>
               </div>
               <Switch 
-                checked={notifications.emailMarketing}
+                checked={notifications?.emailMarketing ?? false}
                 onCheckedChange={(checked) => handleNotificationChange('emailMarketing', checked)}
                 disabled={loadingNotifications}
               />
