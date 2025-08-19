@@ -4,13 +4,24 @@
 
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { settingsAPI } from '@/lib/api'
-import type { DeleteAccountRequest } from '@/lib/api/types'
+import { apiClient } from '@/lib/api'
+
+// Account-related types
+export interface DeleteAccountRequest {
+  confirmation: boolean
+}
+
+export interface DeleteAccountResponse {
+  success: boolean
+  message: string
+  deletionScheduled?: string
+}
 
 // Mutations
 export function useDeleteAccount() {
   return useMutation({
-    mutationFn: (data: DeleteAccountRequest) => settingsAPI.deleteAccount(data),
+    mutationFn: (data: DeleteAccountRequest) => 
+      apiClient.post<DeleteAccountResponse>('/user/delete-account', data),
     onSuccess: (data) => {
       toast.success(data.message)
     },

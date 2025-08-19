@@ -4,8 +4,24 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { settingsAPI } from '@/lib/api'
-import type { NotificationPreferences, UpdateNotificationsRequest } from '@/lib/api/types'
+import { apiClient } from '@/lib/api'
+
+// Notification-related types
+export interface NotificationPreferences {
+  emailMarketing: boolean
+  emailSecurity: boolean
+  emailProduct: boolean
+  pushNotifications?: boolean
+  smsNotifications?: boolean
+}
+
+export interface NotificationsResponse {
+  preferences: NotificationPreferences
+}
+
+export interface UpdateNotificationsRequest {
+  preferences: Partial<NotificationPreferences>
+}
 
 // Query Keys
 export const notificationQueryKeys = {
@@ -17,7 +33,7 @@ export const notificationQueryKeys = {
 export function useNotifications() {
   return useQuery({
     queryKey: notificationQueryKeys.preferences(),
-    queryFn: () => settingsAPI.getNotifications(),
+    queryFn: () => apiClient.get<NotificationsResponse>('/user/notifications'),
     staleTime: 10 * 60 * 1000, // 10 minutes
     select: (data) => data.preferences,
   })
@@ -28,7 +44,8 @@ export function useUpdateNotifications() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (data: UpdateNotificationsRequest) => settingsAPI.updateNotifications(data),
+    mutationFn: (data: UpdateNotificationsRequest) => 
+      apiClient.put<NotificationsResponse>('/user/notifications', data),
     onMutate: async (newData) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: notificationQueryKeys.preferences() })
@@ -46,7 +63,7 @@ export function useUpdateNotifications() {
 
       return { previousNotifications }
     },
-    onError: (err, newData, context) => {
+    onError: (_, __, context) => {
       // Rollback on error
       if (context?.previousNotifications) {
         queryClient.setQueryData(notificationQueryKeys.preferences(), context.previousNotifications)

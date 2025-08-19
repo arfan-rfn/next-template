@@ -4,8 +4,27 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { settingsAPI } from '@/lib/api'
-import type { DeviceSession } from '@/lib/api/types'
+import { apiClient } from '@/lib/api'
+import type { BaseResponse } from '@/lib/types/common'
+
+// Session-related types
+export interface DeviceSession {
+  id: string
+  userId: string
+  userAgent: string
+  ipAddress: string
+  location?: string
+  createdAt: string
+  lastAccessed: string
+  isCurrent: boolean
+  deviceType: string
+  browser: string
+}
+
+export interface SessionsResponse {
+  sessions: DeviceSession[]
+  total: number
+}
 
 // Query Keys
 export const sessionQueryKeys = {
@@ -17,7 +36,7 @@ export const sessionQueryKeys = {
 export function useSessions() {
   return useQuery({
     queryKey: sessionQueryKeys.list(),
-    queryFn: () => settingsAPI.getSessions(),
+    queryFn: () => apiClient.get<SessionsResponse>('/user/session'),
     staleTime: 5 * 60 * 1000, // 5 minutes
     select: (data) => data.sessions,
   })
@@ -28,7 +47,7 @@ export function useRevokeSession() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (sessionId: string) => settingsAPI.revokeSession(sessionId),
+    mutationFn: (sessionId: string) => apiClient.delete<BaseResponse>(`/user/session/${sessionId}`),
     onMutate: async (sessionId) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: sessionQueryKeys.list() })
@@ -43,7 +62,7 @@ export function useRevokeSession() {
 
       return { previousSessions }
     },
-    onError: (err, sessionId, context) => {
+    onError: (_, __, context) => {
       // Rollback on error
       if (context?.previousSessions) {
         queryClient.setQueryData(sessionQueryKeys.list(), context.previousSessions)
@@ -64,7 +83,7 @@ export function useRevokeAllOtherSessions() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: () => settingsAPI.revokeAllOtherSessions(),
+    mutationFn: () => apiClient.delete<BaseResponse>('/user/session'),
     onMutate: async () => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: sessionQueryKeys.list() })
@@ -79,7 +98,7 @@ export function useRevokeAllOtherSessions() {
 
       return { previousSessions }
     },
-    onError: (err, variables, context) => {
+    onError: (_, __, context) => {
       // Rollback on error
       if (context?.previousSessions) {
         queryClient.setQueryData(sessionQueryKeys.list(), context.previousSessions)
