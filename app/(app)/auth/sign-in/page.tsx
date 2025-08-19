@@ -4,10 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Icons } from "@/components/icons"
-import { authClient } from "@/lib/auth"
 import { toast } from "sonner"
-import { env } from "@/env"
-import { parse, deserialize } from 'superjson'
 import { auth } from "@/lib/auth"
 import { useAuthContext } from "@/components/auth-provider"
 
@@ -19,15 +16,13 @@ export default function SignInPage() {
 		email: "",
 		password: "",
 	})
+	const [magicLinkEmail, setMagicLinkEmail] = useState("")
+	const [magicLinkSent, setMagicLinkSent] = useState(false)
 
 	const handleGoogleSignIn = async () => {
 		try {
 			setIsLoading(true)
-			await authClient.signIn.social({
-				provider: "google",
-				callbackURL: 'http://localhost:3000/dashboard',
-
-			})
+			await auth.signInWithGoogle("/dashboard")
 			// Refresh auth state after successful Google sign-in
 			setTimeout(() => {
 				refresh()
@@ -50,22 +45,13 @@ export default function SignInPage() {
 
 		try {
 			setIsLoading(true)
-			await authClient.signIn.email({
-				email: formData.email,
-				password: formData.password,
-			}, {
-				onSuccess: (ctx) => {
-					toast.success("Signed in successfully!")
-					// Refresh auth state after successful email sign-in
-					setTimeout(() => {
-						refresh()
-					}, 100)
-					router.push("/dashboard")
-				},
-				onError: () => {
-					toast.error("Invalid email or password")
-				},
-			})
+			await auth.signInWithEmail(formData.email, formData.password)
+			toast.success("Signed in successfully!")
+			// Refresh auth state after successful email sign-in
+			setTimeout(() => {
+				refresh()
+			}, 100)
+			router.push("/dashboard")
 		} catch (error) {
 			console.error("Email sign-in error:", error)
 			toast.error("Invalid email or password")
@@ -79,6 +65,27 @@ export default function SignInPage() {
 			...prev,
 			[e.target.name]: e.target.value,
 		}))
+	}
+
+	const handleMagicLinkSignIn = async (e: React.FormEvent) => {
+		e.preventDefault()
+
+		if (!magicLinkEmail) {
+			toast.error("Please enter your email address")
+			return
+		}
+
+		try {
+			setIsLoading(true)
+			await auth.signInWithMagicLink(magicLinkEmail)
+			setMagicLinkSent(true)
+			toast.success("Magic link sent! Check your email to sign in.")
+		} catch (error) {
+			console.error("Magic link error:", error)
+			toast.error("Failed to send magic link. Please try again.")
+		} finally {
+			setIsLoading(false)
+		}
 	}
 
 	return (
@@ -113,20 +120,104 @@ export default function SignInPage() {
 							Continue with Google
 						</Button>
 
-						{/* Divider */}
-						<div className="relative">
-							<div className="absolute inset-0 flex items-center">
-								<span className="w-full border-t" />
+						{/* Magic Link Section */}
+						{!magicLinkSent ? (
+							<>
+								{/* Divider */}
+								<div className="relative">
+									<div className="absolute inset-0 flex items-center">
+										<span className="w-full border-t" />
+									</div>
+									<div className="relative flex justify-center text-xs uppercase">
+										<span className="bg-background px-2 text-muted-foreground">
+											Or sign in with magic link
+										</span>
+									</div>
+								</div>
+
+								{/* Magic Link Form */}
+								<form onSubmit={handleMagicLinkSignIn} className="space-y-4">
+									<div>
+										<label
+											htmlFor="magicLinkEmail"
+											className="block text-sm font-medium text-foreground"
+										>
+											Email address
+										</label>
+										<input
+											id="magicLinkEmail"
+											name="magicLinkEmail"
+											type="email"
+											autoComplete="email"
+											required
+											value={magicLinkEmail}
+											onChange={(e) => setMagicLinkEmail(e.target.value)}
+											className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+											placeholder="Enter your email for magic link"
+											disabled={isLoading}
+										/>
+									</div>
+
+									<Button
+										type="submit"
+										variant="outline"
+										size="lg"
+										className="w-full"
+										disabled={isLoading}
+									>
+										{isLoading ? (
+											<>
+												<Icons.Circle className="mr-2 h-5 w-5 animate-spin" />
+												Sending magic link...
+											</>
+										) : (
+											<>
+												<Icons.Mail className="mr-2 h-5 w-5" />
+												Send magic link
+											</>
+										)}
+									</Button>
+								</form>
+
+								{/* Divider */}
+								<div className="relative">
+									<div className="absolute inset-0 flex items-center">
+										<span className="w-full border-t" />
+									</div>
+									<div className="relative flex justify-center text-xs uppercase">
+										<span className="bg-background px-2 text-muted-foreground">
+											Or continue with password
+										</span>
+									</div>
+								</div>
+							</>
+						) : (
+							<div className="text-center py-6">
+								<div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+									<Icons.Mail className="h-8 w-8 text-green-600" />
+								</div>
+								<h3 className="text-lg font-medium text-foreground mb-2">
+									Check your email
+								</h3>
+								<p className="text-sm text-muted-foreground mb-4">
+									We&apos;ve sent a magic link to <strong>{magicLinkEmail}</strong>
+								</p>
+								<Button
+									variant="outline"
+									onClick={() => {
+										setMagicLinkSent(false)
+										setMagicLinkEmail("")
+									}}
+									className="text-sm"
+								>
+									Try different email
+								</Button>
 							</div>
-							<div className="relative flex justify-center text-xs uppercase">
-								<span className="bg-background px-2 text-muted-foreground">
-									Or continue with
-								</span>
-							</div>
-						</div>
+						)}
 
 						{/* Email/Password Form */}
-						<form onSubmit={handleEmailSignIn} className="space-y-4">
+						{!magicLinkSent && (
+							<form onSubmit={handleEmailSignIn} className="space-y-4">
 							<div>
 								<label
 									htmlFor="email"
@@ -212,6 +303,7 @@ export default function SignInPage() {
 								)}
 							</Button>
 						</form>
+						)}
 					</div>
 
 					{/* Footer */}

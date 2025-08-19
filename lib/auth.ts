@@ -1,8 +1,13 @@
 import { createAuthClient } from "better-auth/react"
+import { magicLinkClient } from "better-auth/client/plugins"
 import { env } from "@/env"
+import { toAbsoluteUrl } from "@/lib/utils"
 
 export const authClient = createAuthClient({
-	baseURL: `${env.NEXT_PUBLIC_API_URL}/auth`
+	baseURL: `${env.NEXT_PUBLIC_API_URL}/auth`,
+	plugins: [
+		magicLinkClient()
+	]
 })
 
 // Export auth types for better TypeScript support
@@ -21,9 +26,11 @@ export const auth = {
 
 	// Sign in with Google
 	signInWithGoogle: async (callbackURL?: string) => {
+		const absoluteCallbackURL = toAbsoluteUrl(callbackURL || "/dashboard")
+		
 		return await authClient.signIn.social({
 			provider: "google",
-			callbackURL: callbackURL || "/dashboard",
+			callbackURL: absoluteCallbackURL,
 		})
 	},
 
@@ -33,6 +40,16 @@ export const auth = {
 			email,
 			password,
 			name,
+		})
+	},
+
+	// Sign in with magic link
+	signInWithMagicLink: async (email: string, callbackURL?: string) => {
+		const absoluteCallbackURL = toAbsoluteUrl(callbackURL || "/dashboard")
+		
+		return await authClient.signIn.magicLink({
+			email,
+			callbackURL: absoluteCallbackURL,
 		})
 	},
 

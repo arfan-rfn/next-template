@@ -7,6 +7,7 @@ import {
   Laptop,
   LucideIcon,
   LucideProps,
+  Mail,
   Menu,
   Moon,
   SunMedium,
@@ -24,6 +25,7 @@ export const Icons = {
   ChevronLeft: ChevronLeft,
   ChevronRight: ChevronRight,
   Menu: Menu,
+  Mail: Mail,
   Logo: (props: LucideProps) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" {...props}>
       <path
