@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Icons } from "@/components/icons"
@@ -11,7 +11,7 @@ import { useAuthConfig } from "@/lib/hooks/use-auth-config"
 
 export default function SignInPage() {
 	const router = useRouter()
-	const { refresh } = useAuthContext()
+	const { refresh, isAuthenticated, isLoading: authLoading } = useAuthContext()
 	const authConfig = useAuthConfig()
 	const [isLoading, setIsLoading] = useState(false)
 	const [formData, setFormData] = useState({
@@ -20,6 +20,13 @@ export default function SignInPage() {
 	})
 	const [magicLinkEmail, setMagicLinkEmail] = useState("")
 	const [magicLinkSent, setMagicLinkSent] = useState(false)
+
+	// Redirect authenticated users to dashboard
+	useEffect(() => {
+		if (!authLoading && isAuthenticated) {
+			router.push(authConfig.redirects.afterSignIn)
+		}
+	}, [authLoading, isAuthenticated, router, authConfig.redirects.afterSignIn])
 
 	const handleGoogleSignIn = async () => {
 		try {
@@ -88,6 +95,25 @@ export default function SignInPage() {
 		} finally {
 			setIsLoading(false)
 		}
+	}
+
+	// Show loading while checking auth status
+	if (authLoading) {
+		return (
+			<div className="flex min-h-[calc(100vh-4rem)] items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+				<div className="w-full max-w-md space-y-8">
+					<div className="text-center">
+						<Icons.Circle className="mx-auto h-8 w-8 animate-spin" />
+						<p className="mt-2 text-sm text-muted-foreground">Loading...</p>
+					</div>
+				</div>
+			</div>
+		)
+	}
+
+	// Don't render sign-in form if user is authenticated (redirect will handle navigation)
+	if (isAuthenticated) {
+		return null
 	}
 
 	return (

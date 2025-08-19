@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -8,10 +8,12 @@ import { Icons } from "@/components/icons"
 import { auth } from "@/lib/auth"
 import { toast } from "sonner"
 import { useAuthConfig } from "@/lib/hooks/use-auth-config"
+import { useAuthContext } from "@/components/auth-provider"
 
 export default function SignUpPage() {
   const router = useRouter()
   const authConfig = useAuthConfig()
+  const { isAuthenticated, isLoading: authLoading } = useAuthContext()
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
@@ -19,6 +21,13 @@ export default function SignUpPage() {
     password: "",
     confirmPassword: "",
   })
+
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      router.push(authConfig.redirects.afterSignUp)
+    }
+  }, [authLoading, isAuthenticated, router, authConfig.redirects.afterSignUp])
 
   const handleGoogleSignUp = async () => {
     try {
@@ -74,6 +83,25 @@ export default function SignUpPage() {
       ...prev,
       [e.target.name]: e.target.value,
     }))
+  }
+
+  // Show loading while checking auth status
+  if (authLoading) {
+    return (
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-md space-y-8">
+          <div className="text-center">
+            <Icons.Circle className="mx-auto h-8 w-8 animate-spin" />
+            <p className="mt-2 text-sm text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Don't render sign-up form if user is authenticated (redirect will handle navigation)
+  if (isAuthenticated) {
+    return null
   }
 
   return (
