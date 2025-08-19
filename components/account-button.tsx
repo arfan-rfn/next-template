@@ -1,10 +1,10 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useAuthContext } from "@/components/auth-provider"
 import { Button } from "@/components/ui/button"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import {
 	DropdownMenu,
 	DropdownMenuTrigger,
@@ -12,8 +12,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
-import { Icons } from "@/components/icons"
-import { cn } from "@/lib/utils"
+import { Icons } from "./icons"
 
 /**
  * AccountButton displays a sign-in button if not authenticated,
@@ -24,38 +23,18 @@ export function AccountButton() {
 	const { user, isAuthenticated, isLoading, signOut, refresh } = useAuthContext()
 	const router = useRouter()
 
-	// Helper: get avatar URL or fallback
-	const getAvatar = () => {
-		if (user?.image) {
-			return (
-				<Image
-					src={user.image || ''}
-					alt={user.name || user.email || "User"}
-					width={32}
-					height={32}
-					className="rounded-full object-cover border size-8"
-					loading="lazy"
-				/>
-			)
-		}
-		// Fallback: initials or icon
-		if (user?.name) {
-			const initials = user.name
-				.split(" ")
-				.map((n: string) => n[0])
-				.join("")
-				.toUpperCase()
-				.slice(0, 2)
-			return (
-				<span className="flex items-center justify-center size-8 rounded-full bg-muted text-xs font-bold text-muted-foreground border">
-					{initials}
-				</span>
-			)
-		}
+	// Helper: render avatar component
+	const renderAvatar = () => {
 		return (
-			<span className="flex items-center justify-center size-8 rounded-full bg-muted text-muted-foreground border">
-				<Icons.Circle className="size-5" />
-			</span>
+			<Avatar className="size-8">
+				<AvatarImage
+					src={user?.image || undefined}
+					alt={user?.name || user?.email || "User"}
+				/>
+				<AvatarFallback className="text-xs font-medium">
+					<Icons.User className="size-4" />
+				</AvatarFallback>
+			</Avatar>
 		)
 	}
 
@@ -95,12 +74,12 @@ export function AccountButton() {
 					className="relative flex items-center justify-center size-10 focus-visible:ring-2 focus-visible:ring-ring"
 					aria-label="Account menu"
 				>
-					{getAvatar()}
+					{renderAvatar()}
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" className="w-56">
 				<div className="flex items-center space-x-3 px-2 py-2">
-					{getAvatar()}
+					{renderAvatar()}
 					<div className="min-w-0 flex-1">
 						<div className="truncate font-medium text-sm">
 							{user?.name || user?.email || "Account"}
@@ -114,10 +93,17 @@ export function AccountButton() {
 				</div>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem asChild>
-					<Link href="/dashboard">Dashboard</Link>
+					<div className="flex items-center gap-2">
+						<Icons.Home className="size-4" />
+						<Link href="/dashboard">Dashboard</Link>
+					</div>
 				</DropdownMenuItem>
+				<DropdownMenuSeparator />
 				<DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive">
-					Sign Out
+					<div className="flex items-center gap-2">
+						<Icons.LogOut className="size-4" />
+						Sign Out
+					</div>
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

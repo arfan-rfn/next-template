@@ -4,13 +4,16 @@ import {
   ChevronRight,
   Circle,
   Clipboard,
+  Home,
   Laptop,
+  LogOut,
   LucideIcon,
   LucideProps,
   Mail,
   Menu,
   Moon,
   SunMedium,
+  User2,
 } from "lucide-react"
 
 export type Icon = LucideIcon
@@ -18,6 +21,7 @@ export type Icon = LucideIcon
 export const Icons = {
   Sun: SunMedium,
   Moon: Moon,
+  User: User2,
   Copy: Clipboard,
   Circle: Circle,
   Check: CheckCircle2,
@@ -26,6 +30,8 @@ export const Icons = {
   ChevronRight: ChevronRight,
   Menu: Menu,
   Mail: Mail,
+  Home: Home,
+  LogOut: LogOut,
   Logo: (props: LucideProps) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" {...props}>
       <path
