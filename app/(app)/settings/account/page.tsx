@@ -17,7 +17,8 @@ import {
   AlertDialogTrigger 
 } from "@/components/ui/alert-dialog"
 import { Icons } from "@/components/icons"
-import { useEffect } from "react"
+import { Input } from "@/components/ui/input"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useNotifications, useUpdateNotificationSetting } from "@/lib/hooks/use-notifications"
 import { useDeleteAccount } from "@/lib/hooks/use-account"
@@ -25,6 +26,7 @@ import { useDeleteAccount } from "@/lib/hooks/use-account"
 export default function AccountSettingsPage() {
   const { user, isAuthenticated, isLoading } = useAuthContext()
   const router = useRouter()
+  const [deleteConfirmation, setDeleteConfirmation] = useState("")
   
   // TanStack Query hooks
   const { data: notifications, isLoading: loadingNotifications } = useNotifications()
@@ -42,8 +44,13 @@ export default function AccountSettingsPage() {
   }
 
   const handleDeleteAccount = () => {
-    deleteAccountMutation.mutate({ confirmation: true })
+    if (deleteConfirmation === "DELETE") {
+      deleteAccountMutation.mutate({ confirmation: "DELETE" })
+      setDeleteConfirmation("") // Reset the input
+    }
   }
+
+  const isDeleteConfirmed = deleteConfirmation === "DELETE"
 
   if (isLoading) {
     return (
@@ -232,9 +239,13 @@ export default function AccountSettingsPage() {
                 Permanently delete your account and all associated data
               </p>
             </div>
-            <AlertDialog>
+            <AlertDialog onOpenChange={(open) => !open && setDeleteConfirmation("")}>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="shrink-0">
+                <Button 
+                  variant="destructive" 
+                  className="shrink-0"
+                  disabled={deleteAccountMutation.isPending}
+                >
                   <Icons.Trash className="size-4 mr-2" />
                   Delete Account
                 </Button>
@@ -242,16 +253,56 @@ export default function AccountSettingsPage() {
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete your
-                    account and remove your data from our servers. You will receive
-                    an email with instructions to confirm this deletion.
+                  <AlertDialogDescription asChild>
+                    <div className="space-y-4">
+                      <div>
+                        This action cannot be undone. This will permanently delete your
+                        account and remove your data from our servers.
+                      </div>
+                      <div className="font-medium">
+                        To confirm, this action will:
+                      </div>
+                      <ul className="list-disc list-inside space-y-1 text-sm">
+                        <li>Permanently delete your account</li>
+                        <li>Remove all your personal data</li>
+                        <li>Cancel any active subscriptions</li>
+                        <li>Sign you out of all devices</li>
+                      </ul>
+                      <div className="space-y-2">
+                        <div className="font-medium text-sm">
+                          Type <span className="font-mono bg-muted px-1 py-0.5 rounded">DELETE</span> to confirm:
+                        </div>
+                        <Input
+                          value={deleteConfirmation}
+                          onChange={(e) => setDeleteConfirmation(e.target.value)}
+                          placeholder="Type DELETE to confirm"
+                          className="font-mono"
+                          disabled={deleteAccountMutation.isPending}
+                        />
+                      </div>
+                    </div>
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                    Request Account Deletion
+                  <AlertDialogCancel disabled={deleteAccountMutation.isPending}>
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={handleDeleteAccount} 
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    disabled={deleteAccountMutation.isPending || !isDeleteConfirmed}
+                  >
+                    {deleteAccountMutation.isPending ? (
+                      <>
+                        <Icons.Loader2 className="size-4 mr-2 animate-spin" />
+                        Deleting...
+                      </>
+                    ) : (
+                      <>
+                        <Icons.Trash className="size-4 mr-2" />
+                        Delete Account
+                      </>
+                    )}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
