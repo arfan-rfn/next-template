@@ -7,9 +7,11 @@ import { Button } from "@/components/ui/button"
 import { Icons } from "@/components/icons"
 import { auth } from "@/lib/auth"
 import { toast } from "sonner"
+import { useAuthConfig } from "@/lib/hooks/use-auth-config"
 
 export default function SignUpPage() {
   const router = useRouter()
+  const authConfig = useAuthConfig()
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
@@ -21,7 +23,7 @@ export default function SignUpPage() {
   const handleGoogleSignUp = async () => {
     try {
       setIsLoading(true)
-      await auth.signInWithGoogle("/dashboard")
+      await auth.signInWithGoogle(authConfig.redirects.afterSignUp)
     } catch (error) {
       console.error("Google sign-up error:", error)
       toast.error("Failed to sign up with Google")
@@ -55,8 +57,10 @@ export default function SignUpPage() {
         email: formData.email,
         password: formData.password,
       })
-      toast.success("Account created successfully! Please check your email to verify your account.")
-      router.push("/auth/sign-in")
+      toast.success(authConfig.features.emailVerification 
+        ? "Account created successfully! Please check your email to verify your account."
+        : "Account created successfully!")
+      router.push(authConfig.features.emailVerification ? "/auth/sign-in" : authConfig.redirects.afterSignUp)
     } catch (error) {
       console.error("Email sign-up error:", error)
       toast.error("Failed to create account. Please try again.")
@@ -89,6 +93,7 @@ export default function SignUpPage() {
         <div className="mt-8 space-y-6">
           <div className="space-y-4">
             {/* Google Sign Up Button */}
+            {authConfig.methods.google && (
             <Button
               variant="outline"
               size="lg"
@@ -103,8 +108,10 @@ export default function SignUpPage() {
               )}
               Continue with Google
             </Button>
+            )}
 
             {/* Divider */}
+            {authConfig.hasMultipleMethods() && authConfig.methods.emailPassword && (
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t" />
@@ -115,8 +122,10 @@ export default function SignUpPage() {
                 </span>
               </div>
             </div>
+            )}
 
             {/* Email/Password Form */}
+            {authConfig.methods.emailPassword && (
             <form onSubmit={handleEmailSignUp} className="space-y-4">
               <div>
                 <label
@@ -217,6 +226,7 @@ export default function SignUpPage() {
                 )}
               </Button>
             </form>
+            )}
           </div>
 
           {/* Footer */}

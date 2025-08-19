@@ -7,10 +7,12 @@ import { Icons } from "@/components/icons"
 import { toast } from "sonner"
 import { auth } from "@/lib/auth"
 import { useAuthContext } from "@/components/auth-provider"
+import { useAuthConfig } from "@/lib/hooks/use-auth-config"
 
 export default function SignInPage() {
 	const router = useRouter()
 	const { refresh } = useAuthContext()
+	const authConfig = useAuthConfig()
 	const [isLoading, setIsLoading] = useState(false)
 	const [formData, setFormData] = useState({
 		email: "",
@@ -22,7 +24,7 @@ export default function SignInPage() {
 	const handleGoogleSignIn = async () => {
 		try {
 			setIsLoading(true)
-			await auth.signInWithGoogle("/dashboard")
+			await auth.signInWithGoogle(authConfig.redirects.afterSignIn)
 			// Refresh auth state after successful Google sign-in
 			setTimeout(() => {
 				refresh()
@@ -51,7 +53,7 @@ export default function SignInPage() {
 			setTimeout(() => {
 				refresh()
 			}, 100)
-			router.push("/dashboard")
+			router.push(authConfig.redirects.afterSignIn)
 		} catch (error) {
 			console.error("Email sign-in error:", error)
 			toast.error("Invalid email or password")
@@ -104,37 +106,9 @@ export default function SignInPage() {
 				{/* Sign In Form */}
 				<div className="mt-8 space-y-6">
 					<div className="space-y-4">
-						{/* Google Sign In Button */}
-						<Button
-							variant="outline"
-							size="lg"
-							className="w-full"
-							onClick={handleGoogleSignIn}
-							disabled={isLoading}
-						>
-							{isLoading ? (
-								<Icons.Circle className="mr-2 h-5 w-5 animate-spin" />
-							) : (
-								<Icons.Google className="mr-2 h-5 w-5" />
-							)}
-							Continue with Google
-						</Button>
-
-						{/* Magic Link Section */}
-						{!magicLinkSent ? (
+						{/* Magic Link Section - First Priority */}
+						{authConfig.methods.magicLink && !magicLinkSent ? (
 							<>
-								{/* Divider */}
-								<div className="relative">
-									<div className="absolute inset-0 flex items-center">
-										<span className="w-full border-t" />
-									</div>
-									<div className="relative flex justify-center text-xs uppercase">
-										<span className="bg-background px-2 text-muted-foreground">
-											Or sign in with magic link
-										</span>
-									</div>
-								</div>
-
 								{/* Magic Link Form */}
 								<form onSubmit={handleMagicLinkSignIn} className="space-y-4">
 									<div>
@@ -160,7 +134,6 @@ export default function SignInPage() {
 
 									<Button
 										type="submit"
-										variant="outline"
 										size="lg"
 										className="w-full"
 										disabled={isLoading}
@@ -178,20 +151,8 @@ export default function SignInPage() {
 										)}
 									</Button>
 								</form>
-
-								{/* Divider */}
-								<div className="relative">
-									<div className="absolute inset-0 flex items-center">
-										<span className="w-full border-t" />
-									</div>
-									<div className="relative flex justify-center text-xs uppercase">
-										<span className="bg-background px-2 text-muted-foreground">
-											Or continue with password
-										</span>
-									</div>
-								</div>
 							</>
-						) : (
+						) : authConfig.methods.magicLink && magicLinkSent ? (
 							<div className="text-center py-6">
 								<div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
 									<Icons.Mail className="h-8 w-8 text-green-600" />
@@ -213,11 +174,60 @@ export default function SignInPage() {
 									Try different email
 								</Button>
 							</div>
+						) : null}
+
+						{/* Social Sign In - Second Priority */}
+						{authConfig.methods.google && (
+							<>
+								{/* Divider */}
+								{authConfig.hasMultipleMethods() && (authConfig.methods.magicLink || authConfig.methods.emailPassword) && (
+								<div className="relative">
+									<div className="absolute inset-0 flex items-center">
+										<span className="w-full border-t" />
+									</div>
+									<div className="relative flex justify-center text-xs uppercase">
+										<span className="bg-background px-2 text-muted-foreground">
+											Or continue with social
+										</span>
+									</div>
+								</div>
+								)}
+
+								<Button
+									variant="outline"
+									size="lg"
+									className="w-full"
+									onClick={handleGoogleSignIn}
+									disabled={isLoading}
+								>
+									{isLoading ? (
+										<Icons.Circle className="mr-2 h-5 w-5 animate-spin" />
+									) : (
+										<Icons.Google className="mr-2 h-5 w-5" />
+									)}
+									Continue with Google
+								</Button>
+							</>
 						)}
 
-						{/* Email/Password Form */}
-						{!magicLinkSent && (
-							<form onSubmit={handleEmailSignIn} className="space-y-4">
+						{/* Email/Password Form - Third Priority */}
+						{authConfig.methods.emailPassword && !magicLinkSent && (
+							<>
+								{/* Divider */}
+								{authConfig.hasMultipleMethods() && (authConfig.methods.magicLink || authConfig.methods.google) && (
+								<div className="relative">
+									<div className="absolute inset-0 flex items-center">
+										<span className="w-full border-t" />
+									</div>
+									<div className="relative flex justify-center text-xs uppercase">
+										<span className="bg-background px-2 text-muted-foreground">
+											Or continue with password
+										</span>
+									</div>
+								</div>
+								)}
+
+								<form onSubmit={handleEmailSignIn} className="space-y-4">
 							<div>
 								<label
 									htmlFor="email"
@@ -260,7 +270,9 @@ export default function SignInPage() {
 								/>
 							</div>
 
+							{(authConfig.features.rememberMe || authConfig.features.forgotPassword) && (
 							<div className="flex items-center justify-between">
+								{authConfig.features.rememberMe && (
 								<div className="flex items-center">
 									<input
 										id="remember-me"
@@ -276,7 +288,9 @@ export default function SignInPage() {
 										Remember me
 									</label>
 								</div>
+								)}
 
+								{authConfig.features.forgotPassword && (
 								<div className="text-sm">
 									<a
 										href="#"
@@ -285,7 +299,9 @@ export default function SignInPage() {
 										Forgot your password?
 									</a>
 								</div>
+								)}
 							</div>
+							)}
 
 							<Button
 								type="submit"
@@ -303,10 +319,12 @@ export default function SignInPage() {
 								)}
 							</Button>
 						</form>
+							</>
 						)}
 					</div>
 
 					{/* Footer */}
+					{authConfig.methods.emailPassword && (
 					<div className="text-center">
 						<p className="text-sm text-muted-foreground">
 							Don&apos;t have an account?{" "}
@@ -318,6 +336,7 @@ export default function SignInPage() {
 							</a>
 						</p>
 					</div>
+					)}
 				</div>
 			</div>
 		</div>
