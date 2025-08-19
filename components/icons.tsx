@@ -14,6 +14,15 @@ import {
   Moon,
   SunMedium,
   User2,
+  Settings,
+  Shield,
+  Smartphone,
+  Monitor,
+  Trash2,
+  Bell,
+  AlertTriangle,
+  Clock,
+  MapPin,
 } from "lucide-react"
 
 export type Icon = LucideIcon
@@ -32,6 +41,15 @@ export const Icons = {
   Mail: Mail,
   Home: Home,
   LogOut: LogOut,
+  Settings: Settings,
+  Shield: Shield,
+  Smartphone: Smartphone,
+  Monitor: Monitor,
+  Trash: Trash2,
+  Bell: Bell,
+  Warning: AlertTriangle,
+  Clock: Clock,
+  Location: MapPin,
   Logo: (props: LucideProps) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" {...props}>
       <path

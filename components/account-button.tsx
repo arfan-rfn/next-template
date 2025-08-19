@@ -98,6 +98,12 @@ export function AccountButton() {
 						<Link href="/dashboard">Dashboard</Link>
 					</div>
 				</DropdownMenuItem>
+				<DropdownMenuItem asChild>
+					<div className="flex items-center gap-2">
+						<Icons.Settings className="size-4" />
+						<Link href="/settings">Settings</Link>
+					</div>
+				</DropdownMenuItem>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive">
 					<div className="flex items-center gap-2">
