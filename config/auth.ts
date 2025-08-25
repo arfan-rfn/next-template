@@ -20,7 +20,7 @@ export type AuthConfig = {
 
 export const authConfig: AuthConfig = {
   methods: {
-    emailPassword: false,
+    emailPassword: true,
     magicLink: true,
     google: true,
   },
