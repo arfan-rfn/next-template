@@ -7,7 +7,21 @@ export const authClient = createAuthClient({
 	baseURL: `${env.NEXT_PUBLIC_API_URL}/auth`,
 	plugins: [
 		magicLinkClient()
-	]
+	],
+	// Configure for cross-domain deployment
+	fetchOptions: {
+		credentials: 'include',
+		headers: {
+			'Content-Type': 'application/json',
+		}
+	},
+	// Additional session configuration for production
+	session: {
+		cookieCache: {
+			enabled: true,
+			maxAge: 60 * 5 // 5 minutes cache
+		}
+	}
 })
 
 // Export auth types for better TypeScript support
