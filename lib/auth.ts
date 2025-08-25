@@ -11,9 +11,6 @@ export const authClient = createAuthClient({
 	// Configure for cross-domain deployment
 	fetchOptions: {
 		credentials: 'include',
-		headers: {
-			'Content-Type': 'application/json',
-		}
 	},
 	// Additional session configuration for production
 	session: {
