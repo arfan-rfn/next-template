@@ -18,6 +18,19 @@ export interface DeleteAccountResponse {
   deletionScheduled?: string
 }
 
+export interface UpdateProfileRequest {
+  name?: string
+  bio?: string
+  image?: string
+  profileCompleted?: boolean
+}
+
+export interface UpdateProfileResponse {
+  success: boolean
+  message: string
+  user: any // Better Auth user type
+}
+
 // Mutations
 export function useDeleteAccount() {
   return useMutation({
@@ -50,6 +63,39 @@ export function useDeleteAccount() {
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to request account deletion')
+    },
+  })
+}
+
+export function useUpdateProfile() {
+  return useMutation({
+    mutationFn: async (data: UpdateProfileRequest) => {
+      const session = await authClient.getSession()
+      if (!session?.data?.session?.token) {
+        throw new Error('No authentication token found')
+      }
+
+      const response = await fetch(`${env.NEXT_PUBLIC_API_URL}/user/profile`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${session.data.session.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to update profile: ${response.status} ${errorText}`)
+      }
+
+      return response.json() as Promise<UpdateProfileResponse>
+    },
+    onSuccess: (data) => {
+      toast.success(data?.message || 'Profile updated successfully')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to update profile')
     },
   })
 }

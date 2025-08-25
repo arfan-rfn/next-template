@@ -17,6 +17,13 @@ export default function DashboardPage() {
     }
   }, [isAuthenticated, router, isLoading])
 
+  // Show welcome modal for users with incomplete profiles
+  useEffect(() => {
+    if (user && !user.profileCompleted && isAuthenticated && !isLoading) {
+      router.push('/dashboard/welcome')
+    }
+  }, [user, isAuthenticated, isLoading, router])
+
   return (
     <div className="min-h-screen p-4">
       <div className="w-full max-w-md mx-auto pt-20">
@@ -39,7 +46,7 @@ export default function DashboardPage() {
 
           <div className="flex gap-3 justify-center">
             <Button
-              onClick={() => router.push('/settings/profile')}
+              onClick={() => router.push('/dashboard/edit')}
               className="flex-1 max-w-[150px]"
             >
               <Icons.Edit className="w-4 h-4 mr-2" />
