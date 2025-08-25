@@ -92,24 +92,27 @@ export function AccountButton() {
 					</div>
 				</div>
 				<DropdownMenuSeparator />
-				<DropdownMenuItem asChild>
-					<div className="flex items-center gap-2">
-						<Icons.Home className="size-4" />
-						<Link href="/dashboard">Dashboard</Link>
-					</div>
+				<DropdownMenuItem
+					onClick={() => router.push("/dashboard")}
+					className="cursor-pointer space-x-2"
+				>
+					<Icons.Home className="size-4" />
+					<span>Dashboard</span>
 				</DropdownMenuItem>
-				<DropdownMenuItem asChild>
-					<div className="flex items-center gap-2">
-						<Icons.Settings className="size-4" />
-						<Link href="/settings">Settings</Link>
-					</div>
+				<DropdownMenuItem
+					onClick={() => router.push("/settings")}
+					className="cursor-pointer space-x-2"
+				>
+					<Icons.Settings className="size-4" />
+					<span>Settings</span>
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
-				<DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive">
-					<div className="flex items-center gap-2">
-						<Icons.LogOut className="size-4" />
-						Sign Out
-					</div>
+				<DropdownMenuItem
+					onClick={handleSignOut}
+					className="text-destructive focus:text-destructive cursor-pointer space-x-2"
+				>
+					<Icons.LogOut className="size-4" />
+					<span>Sign Out</span>
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
