@@ -4,7 +4,6 @@ import { useAuthContext } from "@/components/providers/auth-provider"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { Switch } from "@/components/ui/switch"
 import { 
   AlertDialog, 
   AlertDialogAction, 
@@ -20,8 +19,8 @@ import { Icons } from "@/components/icons"
 import { Input } from "@/components/ui/input"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { useNotifications, useUpdateNotificationSetting } from "@/lib/hooks/use-notifications"
 import { useDeleteAccount } from "@/lib/hooks/use-account"
+import { authClient } from "@/lib/auth"
 
 export default function AccountSettingsPage() {
   const { user, isAuthenticated, isLoading } = useAuthContext()
@@ -29,8 +28,6 @@ export default function AccountSettingsPage() {
   const [deleteConfirmation, setDeleteConfirmation] = useState("")
   
   // TanStack Query hooks
-  const { data: notifications, isLoading: loadingNotifications } = useNotifications()
-  const updateNotificationSetting = useUpdateNotificationSetting()
   const deleteAccountMutation = useDeleteAccount()
 
   useEffect(() => {
@@ -39,15 +36,16 @@ export default function AccountSettingsPage() {
     }
   }, [isAuthenticated, isLoading, router])
 
-  const handleNotificationChange = (key: 'emailSecurity' | 'emailProduct' | 'emailMarketing', value: boolean) => {
-    updateNotificationSetting(key, value)
-  }
-
   const handleDeleteAccount = () => {
     if (deleteConfirmation === "DELETE") {
       deleteAccountMutation.mutate({ confirmation: "DELETE" })
       setDeleteConfirmation("") // Reset the input
     }
+  }
+
+  const handleSignOut = async () => {
+    await authClient.signOut()
+    router.push("/auth/sign-in")
   }
 
   const isDeleteConfirmed = deleteConfirmation === "DELETE"
@@ -69,156 +67,59 @@ export default function AccountSettingsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Profile Information */}
+      {/* Account Information */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Icons.User className="size-5" />
-            Profile Information
+            Account Information
           </CardTitle>
           <CardDescription>
-            View and manage your account details.
+            Your account details and identifiers.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Name</label>
-                <p className="text-sm text-muted-foreground">{user?.name || 'Not provided'}</p>
+            <div className="grid grid-cols-1 gap-4">
+              <div className="flex items-start gap-3">
+                <Icons.User className="size-4 mt-0.5 text-muted-foreground" />
+                <div className="space-y-1 flex-1">
+                  <p className="text-sm font-medium">Name</p>
+                  <p className="text-sm text-muted-foreground">{user?.name || 'Not provided'}</p>
+                </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Email</label>
-                <p className="text-sm text-muted-foreground">{user?.email}</p>
+              <div className="flex items-start gap-3">
+                <Icons.Mail className="size-4 mt-0.5 text-muted-foreground" />
+                <div className="space-y-1 flex-1">
+                  <p className="text-sm font-medium">Email Address</p>
+                  <p className="text-sm text-muted-foreground">{user?.email}</p>
+                </div>
               </div>
-            </div>
-            
-            <Separator />
-            
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <h4 className="font-medium">Update Profile</h4>
-                <p className="text-sm text-muted-foreground">
-                  Change your name and other profile information
-                </p>
+              <div className="flex items-start gap-3">
+                <Icons.Calendar className="size-4 mt-0.5 text-muted-foreground" />
+                <div className="space-y-1 flex-1">
+                  <p className="text-sm font-medium">Account Created</p>
+                  <p className="text-sm text-muted-foreground">
+                    {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    }) : 'Unknown'}
+                  </p>
+                </div>
               </div>
-              <Button variant="outline">Edit Profile</Button>
+              <div className="flex items-start gap-3">
+                <Icons.Key className="size-4 mt-0.5 text-muted-foreground" />
+                <div className="space-y-1 flex-1">
+                  <p className="text-sm font-medium">Account ID</p>
+                  <p className="text-sm text-muted-foreground font-mono">{user?.id}</p>
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Security Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Icons.Shield className="size-5" />
-            Security
-          </CardTitle>
-          <CardDescription>
-            Manage your account security settings.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <h4 className="font-medium">Password</h4>
-                <p className="text-sm text-muted-foreground">
-                  Last changed 3 months ago
-                </p>
-              </div>
-              <Button variant="outline">Change Password</Button>
-            </div>
-            
-            <Separator />
-            
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <h4 className="font-medium">Two-Factor Authentication</h4>
-                <p className="text-sm text-muted-foreground">
-                  Add an extra layer of security to your account
-                </p>
-              </div>
-              <Button variant="outline">Enable 2FA</Button>
-            </div>
-            
-            <Separator />
-            
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <h4 className="font-medium">Login Notifications</h4>
-                <p className="text-sm text-muted-foreground">
-                  Get notified of new sign-ins to your account
-                </p>
-              </div>
-              <Switch defaultChecked />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Email Notifications */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Icons.Bell className="size-5" />
-            Email Notifications
-          </CardTitle>
-          <CardDescription>
-            Choose which emails you&apos;d like to receive from us.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <h4 className="font-medium">Security Alerts</h4>
-                <p className="text-sm text-muted-foreground">
-                  Important security updates and notifications
-                </p>
-              </div>
-              <Switch 
-                checked={notifications?.emailSecurity ?? true}
-                onCheckedChange={(checked) => handleNotificationChange('emailSecurity', checked)}
-                disabled={loadingNotifications}
-              />
-            </div>
-            
-            <Separator />
-            
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <h4 className="font-medium">Product Updates</h4>
-                <p className="text-sm text-muted-foreground">
-                  New features and product announcements
-                </p>
-              </div>
-              <Switch 
-                checked={notifications?.emailProduct ?? true}
-                onCheckedChange={(checked) => handleNotificationChange('emailProduct', checked)}
-                disabled={loadingNotifications}
-              />
-            </div>
-            
-            <Separator />
-            
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <h4 className="font-medium">Marketing Emails</h4>
-                <p className="text-sm text-muted-foreground">
-                  Tips, tutorials, and promotional content
-                </p>
-              </div>
-              <Switch 
-                checked={notifications?.emailMarketing ?? false}
-                onCheckedChange={(checked) => handleNotificationChange('emailMarketing', checked)}
-                disabled={loadingNotifications}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Danger Zone */}
       <Card className="border-destructive/20">
@@ -232,6 +133,25 @@ export default function AccountSettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <h4 className="font-medium">Sign Out</h4>
+              <p className="text-sm text-muted-foreground">
+                Sign out of your account on this device
+              </p>
+            </div>
+            <Button 
+              variant="outline" 
+              onClick={handleSignOut}
+              className="shrink-0"
+            >
+              <Icons.LogOut className="size-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
+          
+          <Separator />
+          
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <h4 className="font-medium">Delete Account</h4>

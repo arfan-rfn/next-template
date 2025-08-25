@@ -23,6 +23,8 @@ import {
   Clock,
   MapPin,
   Edit,
+  Key,
+  Calendar,
 } from "lucide-react"
 
 export type Icon = LucideIcon
@@ -50,6 +52,8 @@ export const Icons = {
   Warning: AlertTriangle,
   Clock: Clock,
   Location: MapPin,
+  Key: Key,
+  Calendar: Calendar,
   Logo: (props: LucideProps) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" {...props}>
       <path
