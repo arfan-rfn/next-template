@@ -79,25 +79,25 @@ export default function AccountSettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 gap-4">
+          <div className="grid gap-4 sm:gap-6">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="flex items-start gap-3">
-                <Icons.User className="size-4 mt-0.5 text-muted-foreground" />
-                <div className="space-y-1 flex-1">
+                <Icons.User className="size-4 mt-0.5 text-muted-foreground shrink-0" />
+                <div className="space-y-1 flex-1 min-w-0">
                   <p className="text-sm font-medium">Name</p>
-                  <p className="text-sm text-muted-foreground">{user?.name || 'Not provided'}</p>
+                  <p className="text-sm text-muted-foreground truncate">{user?.name || 'Not provided'}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <Icons.Mail className="size-4 mt-0.5 text-muted-foreground" />
-                <div className="space-y-1 flex-1">
+                <Icons.Mail className="size-4 mt-0.5 text-muted-foreground shrink-0" />
+                <div className="space-y-1 flex-1 min-w-0">
                   <p className="text-sm font-medium">Email Address</p>
-                  <p className="text-sm text-muted-foreground">{user?.email}</p>
+                  <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <Icons.Calendar className="size-4 mt-0.5 text-muted-foreground" />
-                <div className="space-y-1 flex-1">
+                <Icons.Calendar className="size-4 mt-0.5 text-muted-foreground shrink-0" />
+                <div className="space-y-1 flex-1 min-w-0">
                   <p className="text-sm font-medium">Account Created</p>
                   <p className="text-sm text-muted-foreground">
                     {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { 
@@ -108,11 +108,11 @@ export default function AccountSettingsPage() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-start gap-3">
-                <Icons.Key className="size-4 mt-0.5 text-muted-foreground" />
-                <div className="space-y-1 flex-1">
+              <div className="flex items-start gap-3 sm:col-span-2">
+                <Icons.Key className="size-4 mt-0.5 text-muted-foreground shrink-0" />
+                <div className="space-y-1 flex-1 min-w-0">
                   <p className="text-sm font-medium">Account ID</p>
-                  <p className="text-sm text-muted-foreground font-mono">{user?.id}</p>
+                  <p className="text-sm text-muted-foreground font-mono break-all">{user?.id}</p>
                 </div>
               </div>
             </div>
@@ -133,8 +133,8 @@ export default function AccountSettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="space-y-1 min-w-0 flex-1">
               <h4 className="font-medium">Sign Out</h4>
               <p className="text-sm text-muted-foreground">
                 Sign out of your account on this device
@@ -143,7 +143,7 @@ export default function AccountSettingsPage() {
             <Button 
               variant="outline" 
               onClick={handleSignOut}
-              className="shrink-0"
+              className="shrink-0 w-full sm:w-auto"
             >
               <Icons.LogOut className="size-4 mr-2" />
               Sign Out
@@ -152,8 +152,8 @@ export default function AccountSettingsPage() {
           
           <Separator />
           
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="space-y-1 min-w-0 flex-1">
               <h4 className="font-medium">Delete Account</h4>
               <p className="text-sm text-muted-foreground">
                 Permanently delete your account and all associated data
@@ -163,7 +163,7 @@ export default function AccountSettingsPage() {
               <AlertDialogTrigger asChild>
                 <Button 
                   variant="destructive" 
-                  className="shrink-0"
+                  className="shrink-0 w-full sm:w-auto"
                   disabled={deleteAccountMutation.isPending}
                 >
                   <Icons.Trash className="size-4 mr-2" />
