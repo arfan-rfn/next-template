@@ -1,14 +1,14 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { auth } from "@/lib/auth"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuth } from "@/lib/hooks/use-auth"
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
+import { Icons } from "@/components/icons"
 
 export default function DashboardPage() {
-  const { user, signOut, isAuthenticated, isLoading } = useAuth()
+  const { user, isAuthenticated, isLoading } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
@@ -17,40 +17,45 @@ export default function DashboardPage() {
     }
   }, [isAuthenticated, router, isLoading])
 
-  const handleSignOut = async () => {
-    try {
-      await signOut()
-      toast.success("Signed out successfully")
-      router.push("/auth/sign-in")
-    } catch (error) {
-      console.error("Sign out error:", error)
-      toast.error("Failed to sign out")
-    }
-  }
-
   return (
-      <div className="container mx-auto py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-              <p className="text-muted-foreground mt-2">
-                Welcome back, {user?.email || "User"}!
-              </p>
-            </div>
-            <Button onClick={handleSignOut} variant="outline">
-              Sign Out
+    <div className="min-h-screen p-4">
+      <div className="w-full max-w-md mx-auto pt-20">
+        <div className="text-center space-y-8">
+          <Avatar className="w-24 h-24 mx-auto">
+            <AvatarImage src={user?.image || undefined} alt={user?.name || user?.email} />
+            <AvatarFallback className="bg-muted">
+              <Icons.User className="w-10 h-10 text-muted-foreground" />
+            </AvatarFallback>
+          </Avatar>
+
+          <div className="space-y-1">
+            <h1 className="text-2xl font-semibold text-foreground">
+              {user?.name || 'Welcome'}
+            </h1>
+            <p className="text-muted-foreground">
+              {user?.email}
+            </p>
+          </div>
+
+          <div className="flex gap-3 justify-center">
+            <Button
+              onClick={() => router.push('/settings/profile')}
+              className="flex-1 max-w-[150px]"
+            >
+              <Icons.Edit className="w-4 h-4 mr-2" />
+              Edit Profile
+            </Button>
+            <Button
+              onClick={() => router.push('/settings')}
+              variant="outline"
+              className="flex-1 max-w-[150px]"
+            >
+              <Icons.Settings className="w-4 h-4 mr-2" />
+              Settings
             </Button>
           </div>
-
-          <div className="p-6 bg-card rounded-lg border">
-            <pre className="whitespace-pre-wrap break-words text-background">
-              {JSON.stringify(user, null, 2)}
-            </pre>
-          </div>
-
         </div>
       </div>
-
+    </div>
   )
 }

@@ -22,6 +22,7 @@ import {
   AlertTriangle,
   Clock,
   MapPin,
+  Edit,
 } from "lucide-react"
 
 export type Icon = LucideIcon
@@ -30,6 +31,7 @@ export const Icons = {
   Sun: SunMedium,
   Moon: Moon,
   User: User2,
+  Edit: Edit,
   Copy: Clipboard,
   Circle: Circle,
   Check: CheckCircle2,
