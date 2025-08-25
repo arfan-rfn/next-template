@@ -27,7 +27,7 @@ export const auth = {
 	// Sign in with Google
 	signInWithGoogle: async (callbackURL?: string) => {
 		const absoluteCallbackURL = toAbsoluteUrl(callbackURL || "/dashboard")
-		
+
 		return await authClient.signIn.social({
 			provider: "google",
 			callbackURL: absoluteCallbackURL,
@@ -46,10 +46,15 @@ export const auth = {
 	// Sign in with magic link
 	signInWithMagicLink: async (email: string, callbackURL?: string) => {
 		const absoluteCallbackURL = toAbsoluteUrl(callbackURL || "/dashboard")
-		
+		const newUserCallbackURL = toAbsoluteUrl("/welcome")
+		const errorCallbackURL = toAbsoluteUrl("/auth/sign-in")
+
+
 		return await authClient.signIn.magicLink({
 			email,
 			callbackURL: absoluteCallbackURL,
+			newUserCallbackURL,
+			errorCallbackURL: errorCallbackURL,
 		})
 	},
 
