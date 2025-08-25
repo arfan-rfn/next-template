@@ -11,12 +11,6 @@ export default function DashboardPage() {
   const { user, isAuthenticated, isLoading } = useAuth()
   const router = useRouter()
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push("/auth/sign-in")
-    }
-  }, [isAuthenticated, router, isLoading])
-
   // Show welcome modal for users with incomplete profiles
   useEffect(() => {
     if (user && !user.profileCompleted && isAuthenticated && !isLoading) {

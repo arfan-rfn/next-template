@@ -31,6 +31,16 @@ export interface UpdateProfileResponse {
   user: any // Better Auth user type
 }
 
+export interface CompleteProfileRequest {
+  name: string
+}
+
+export interface CompleteProfileResponse {
+  success: boolean
+  message: string
+  user: any // Better Auth user type
+}
+
 // Mutations
 export function useDeleteAccount() {
   return useMutation({
@@ -96,6 +106,39 @@ export function useUpdateProfile() {
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to update profile')
+    },
+  })
+}
+
+export function useCompleteProfile() {
+  return useMutation({
+    mutationFn: async (data: CompleteProfileRequest) => {
+      const session = await authClient.getSession()
+      if (!session?.data?.session?.token) {
+        throw new Error('No authentication token found')
+      }
+
+      const response = await fetch(`${env.NEXT_PUBLIC_API_URL}/user/complete-profile`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.data.session.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: data.name }),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to complete profile: ${response.status} ${errorText}`)
+      }
+
+      return response.json() as Promise<CompleteProfileResponse>
+    },
+    onSuccess: (data) => {
+      toast.success(data?.message || 'Profile completed successfully')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to complete profile')
     },
   })
 }

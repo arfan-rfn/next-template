@@ -1,112 +1,198 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogDescription 
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form"
 import { Icons } from "@/components/icons"
 import { useAuth } from "@/lib/hooks/use-auth"
+import { useCompleteProfile } from "@/lib/hooks/use-account"
+import { siteConfig } from "@/config/site"
 
 interface WelcomeModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
+const profileSchema = z.object({
+  name: z.string().min(1, "Name is required").min(2, "Name must be at least 2 characters"),
+})
+
+type ProfileFormValues = z.infer<typeof profileSchema>
+
 export function WelcomeModal({ open, onOpenChange }: WelcomeModalProps) {
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, refresh } = useAuth()
+  const completeProfileMutation = useCompleteProfile()
   const [isLoading, setIsLoading] = useState(false)
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
 
-  const handleCompleteProfile = () => {
-    setIsLoading(true)
-    router.push('/dashboard/edit')
-    setIsLoading(false)
+  const form = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      name: "",
+    },
+  })
+
+  // Update form values when user data is available
+  useEffect(() => {
+    if (user) {
+      form.setValue("name", user.name || "")
+    }
+  }, [user, form])
+
+  const [selectedImage, setSelectedImage] = useState<string>("")
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    try {
+      setIsUploadingImage(true)
+
+      // Create a local preview URL
+      const imageUrl = URL.createObjectURL(file)
+
+      // Store the selected image for preview (not sent to server)
+      setSelectedImage(imageUrl)
+    } catch (error) {
+      console.error("Failed to process image:", error)
+    } finally {
+      setIsUploadingImage(false)
+    }
   }
 
-  const handleSkipForNow = () => {
-    onOpenChange(false)
-    router.push('/dashboard')
+  const onSubmit = async (values: ProfileFormValues) => {
+    try {
+      setIsLoading(true)
+      await completeProfileMutation.mutateAsync({
+        name: values.name,
+      })
+
+      // Refresh user data
+      await refresh()
+
+      // Close modal and navigate to dashboard
+      onOpenChange(false)
+      router.push('/dashboard')
+    } catch (error) {
+      console.error("Failed to complete profile:", error)
+      // Error is already handled by the mutation hook with toast
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-            <Icons.User className="h-6 w-6 text-primary" />
-          </div>
-          <DialogTitle className="text-xl">Welcome to the app!</DialogTitle>
+          <DialogTitle className="text-xl">Welcome to {siteConfig.name}!</DialogTitle>
           <DialogDescription>
-            Hi {user?.name || 'there'}! We&apos;re excited to have you here. Let&apos;s get your profile set up so you can make the most of your experience.
+            Hi {user?.name || 'there'}! We&apos;re excited to have you here. Please complete your profile to get started.
           </DialogDescription>
         </DialogHeader>
-        
-        <div className="space-y-4 py-4">
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">
-                <Icons.Check className="h-4 w-4 text-green-600" />
-              </div>
-              <div className="text-sm">
-                <p className="font-medium">Account created</p>
-                <p className="text-muted-foreground">Your account is ready to go</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
-                <Icons.Edit className="h-4 w-4 text-blue-600" />
-              </div>
-              <div className="text-sm">
-                <p className="font-medium">Complete your profile</p>
-                <p className="text-muted-foreground">Add your details and profile picture</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100">
-                <Icons.Settings className="h-4 w-4 text-gray-600" />
-              </div>
-              <div className="text-sm">
-                <p className="font-medium">Explore the features</p>
-                <p className="text-muted-foreground">Discover everything you can do</p>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-          <Button
-            variant="outline"
-            onClick={handleSkipForNow}
-            className="w-full sm:w-auto"
-          >
-            Skip for now
-          </Button>
-          <Button
-            onClick={handleCompleteProfile}
-            disabled={isLoading}
-            className="w-full sm:w-auto"
-          >
-            {isLoading ? (
-              <>
-                <Icons.Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Loading...
-              </>
-            ) : (
-              <>
-                <Icons.Edit className="mr-2 h-4 w-4" />
-                Complete Profile
-              </>
-            )}
-          </Button>
-        </div>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+            {/* Profile Picture */}
+            <div className="flex flex-col items-center space-y-4">
+              <Avatar className="h-20 w-20">
+                <AvatarImage src={selectedImage || user?.image} alt={form.watch("name") || user?.name || user?.email} />
+                <AvatarFallback className="bg-muted text-lg">
+                  <Icons.User className="h-8 w-8" />
+                </AvatarFallback>
+              </Avatar>
+
+              <div className="flex flex-col items-center space-y-2">
+                <Label htmlFor="image-upload" className="cursor-pointer">
+                  <Button variant="outline" size="sm" asChild disabled={isUploadingImage}>
+                    <span>
+                      {isUploadingImage ? (
+                        <>
+                          <Icons.Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <Icons.Edit className="mr-2 h-4 w-4" />
+                          Change Picture
+                        </>
+                      )}
+                    </span>
+                  </Button>
+                </Label>
+                <input
+                  id="image-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="sr-only"
+                  disabled={isUploadingImage}
+                />
+                <p className="text-xs text-muted-foreground text-center">
+                  Upload a profile picture (JPG, PNG)
+                </p>
+              </div>
+            </div>
+
+            {/* Name Field */}
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Full Name *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter your full name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="flex justify-end pt-4">
+              <Button
+                type="submit"
+                disabled={isLoading || completeProfileMutation.isPending || isUploadingImage}
+                className="w-full sm:w-auto"
+              >
+                {isLoading || completeProfileMutation.isPending ? (
+                  <>
+                    <Icons.Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Completing Profile...
+                  </>
+                ) : (
+                  <>
+                    <Icons.Check className="mr-2 h-4 w-4" />
+                    Complete Profile
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+        </Form>
+
       </DialogContent>
     </Dialog>
   )
