@@ -8,17 +8,9 @@ export const authClient = createAuthClient({
 	plugins: [
 		magicLinkClient()
 	],
-	// Configure for cross-domain deployment
 	fetchOptions: {
 		credentials: 'include',
 	},
-	// Additional session configuration for production
-	session: {
-		cookieCache: {
-			enabled: true,
-			maxAge: 60 * 5 // 5 minutes cache
-		}
-	}
 })
 
 // Export auth types for better TypeScript support

@@ -42,11 +42,11 @@ export function useAuth() {
 
 	useEffect(() => {
 		let mounted = true
-		let timeoutId: NodeJS.Timeout
 
 		const updateAuthState = async () => {
 			try {
 				const session = await authClient.getSession()
+
 				const user = session?.data?.user || null
 
 				if (mounted) {
@@ -75,12 +75,8 @@ export function useAuth() {
 			try {
 				// Initial session check with timeout
 				const sessionPromise = authClient.getSession()
-				const timeoutPromise = new Promise((_, reject) => {
-					timeoutId = setTimeout(() => reject(new Error('Auth timeout')), 5000)
-				})
 
-				const session = await Promise.race([sessionPromise, timeoutPromise]) as AuthSession
-				clearTimeout(timeoutId)
+				const session = await Promise.race([sessionPromise]) as AuthSession
 
 				const user = session?.data?.user || null
 
@@ -120,7 +116,6 @@ export function useAuth() {
 
 		return () => {
 			mounted = false
-			if (timeoutId) clearTimeout(timeoutId)
 		}
 	}, [])
 
