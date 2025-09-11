@@ -9,8 +9,7 @@ export const authClient = createAuthClient({
 		magicLinkClient()
 	],
 	fetchOptions: {
-		credentials: 'include',
-		mode: 'cors',
+		credentials: 'include'
 	},
 })
 
