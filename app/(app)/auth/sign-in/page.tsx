@@ -44,6 +44,22 @@ export default function SignInPage() {
 		}
 	}
 
+	const handleAppleSignIn = async () => {
+		try {
+			setIsLoading(true)
+			await auth.signInWithApple(authConfig.redirects.afterSignIn)
+			// Refresh auth state after successful Apple sign-in
+			setTimeout(() => {
+				refresh()
+			}, 500)
+		} catch (error) {
+			console.error("Apple sign-in error:", error)
+			toast.error("Failed to sign in with Apple")
+		} finally {
+			setIsLoading(false)
+		}
+	}
+
 	const handleEmailSignIn = async (e: React.FormEvent) => {
 		e.preventDefault()
 
@@ -203,7 +219,7 @@ export default function SignInPage() {
 						) : null}
 
 						{/* Social Sign In - Second Priority */}
-						{authConfig.methods.google && (
+						{(authConfig.methods.google || authConfig.methods.apple) && (
 							<>
 								{/* Divider */}
 								{authConfig.hasMultipleMethods() && (authConfig.methods.magicLink || authConfig.methods.emailPassword) && (
@@ -219,20 +235,41 @@ export default function SignInPage() {
 								</div>
 								)}
 
-								<Button
-									variant="outline"
-									size="lg"
-									className="w-full"
-									onClick={handleGoogleSignIn}
-									disabled={isLoading}
-								>
-									{isLoading ? (
-										<Icons.Circle className="mr-2 h-5 w-5 animate-spin" />
-									) : (
-										<Icons.Google className="mr-2 h-5 w-5" />
+								<div className="space-y-3">
+									{authConfig.methods.google && (
+										<Button
+											variant="outline"
+											size="lg"
+											className="w-full"
+											onClick={handleGoogleSignIn}
+											disabled={isLoading}
+										>
+											{isLoading ? (
+												<Icons.Circle className="mr-2 h-5 w-5 animate-spin" />
+											) : (
+												<Icons.Google className="mr-2 h-5 w-5" />
+											)}
+											Continue with Google
+										</Button>
 									)}
-									Continue with Google
-								</Button>
+
+									{authConfig.methods.apple && (
+										<Button
+											variant="outline"
+											size="lg"
+											className="w-full"
+											onClick={handleAppleSignIn}
+											disabled={isLoading}
+										>
+											{isLoading ? (
+												<Icons.Circle className="mr-2 h-5 w-5 animate-spin" />
+											) : (
+												<Icons.Apple className="mr-2 h-5 w-5" />
+											)}
+											Continue with Apple
+										</Button>
+									)}
+								</div>
 							</>
 						)}
 
@@ -240,7 +277,7 @@ export default function SignInPage() {
 						{authConfig.methods.emailPassword && !magicLinkSent && (
 							<>
 								{/* Divider */}
-								{authConfig.hasMultipleMethods() && (authConfig.methods.magicLink || authConfig.methods.google) && (
+								{authConfig.hasMultipleMethods() && (authConfig.methods.magicLink || authConfig.methods.google || authConfig.methods.apple) && (
 								<div className="relative">
 									<div className="absolute inset-0 flex items-center">
 										<span className="w-full border-t" />

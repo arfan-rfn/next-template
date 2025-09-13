@@ -1,10 +1,11 @@
-export type AuthMethod = "emailPassword" | "magicLink" | "google"
+export type AuthMethod = "emailPassword" | "magicLink" | "google" | "apple"
 
 export type AuthConfig = {
   methods: {
     emailPassword: boolean
     magicLink: boolean
     google: boolean
+    apple: boolean
   }
   redirects: {
     afterSignIn: string
@@ -23,6 +24,7 @@ export const authConfig: AuthConfig = {
     emailPassword: true,
     magicLink: true,
     google: true,
+    apple: true,
   },
   redirects: {
     afterSignIn: "/dashboard",
@@ -42,6 +44,7 @@ export function getEnabledAuthMethods(): AuthMethod[] {
   if (authConfig.methods.emailPassword) methods.push("emailPassword")
   if (authConfig.methods.magicLink) methods.push("magicLink")
   if (authConfig.methods.google) methods.push("google")
+  if (authConfig.methods.apple) methods.push("apple")
 
   return methods
 }

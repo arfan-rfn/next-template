@@ -37,6 +37,16 @@ export const auth = {
 		})
 	},
 
+	// Sign in with Apple
+	signInWithApple: async (callbackURL?: string) => {
+		const absoluteCallbackURL = toAbsoluteUrl(callbackURL || "/dashboard")
+
+		return await authClient.signIn.social({
+			provider: "apple",
+			callbackURL: absoluteCallbackURL,
+		})
+	},
+
 	// Sign up with email and password
 	signUpWithEmail: async ({ email, password, name }: { email: string, password: string, name: string }) => {
 		return await authClient.signUp.email({

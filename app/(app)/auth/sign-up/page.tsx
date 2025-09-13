@@ -41,6 +41,18 @@ export default function SignUpPage() {
     }
   }
 
+  const handleAppleSignUp = async () => {
+    try {
+      setIsLoading(true)
+      await auth.signInWithApple(authConfig.redirects.afterSignUp)
+    } catch (error) {
+      console.error("Apple sign-up error:", error)
+      toast.error("Failed to sign up with Apple")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -120,22 +132,43 @@ export default function SignUpPage() {
         {/* Sign Up Form */}
         <div className="mt-8 space-y-6">
           <div className="space-y-4">
-            {/* Google Sign Up Button */}
-            {authConfig.methods.google && (
-            <Button
-              variant="outline"
-              size="lg"
-              className="w-full"
-              onClick={handleGoogleSignUp}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <Icons.Circle className="mr-2 h-5 w-5 animate-spin" />
-              ) : (
-                <Icons.Google className="mr-2 h-5 w-5" />
-              )}
-              Continue with Google
-            </Button>
+            {/* Social Sign Up Buttons */}
+            {(authConfig.methods.google || authConfig.methods.apple) && (
+              <div className="space-y-3">
+                {authConfig.methods.google && (
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="w-full"
+                    onClick={handleGoogleSignUp}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <Icons.Circle className="mr-2 h-5 w-5 animate-spin" />
+                    ) : (
+                      <Icons.Google className="mr-2 h-5 w-5" />
+                    )}
+                    Continue with Google
+                  </Button>
+                )}
+
+                {authConfig.methods.apple && (
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="w-full"
+                    onClick={handleAppleSignUp}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <Icons.Circle className="mr-2 h-5 w-5 animate-spin" />
+                    ) : (
+                      <Icons.Apple className="mr-2 h-5 w-5" />
+                    )}
+                    Continue with Apple
+                  </Button>
+                )}
+              </div>
             )}
 
             {/* Divider */}
