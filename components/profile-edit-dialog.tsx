@@ -51,15 +51,11 @@ export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps
     if (!file) return
 
     try {
-      // TODO: Implement S3 upload using existing integration
-      // For now, just show a placeholder
-      console.log("Image upload not implemented yet:", file.name)
-      
-      // Placeholder - in real implementation, upload to S3 and get URL
+      // Create local preview URL for the selected image
       const imageUrl = URL.createObjectURL(file)
       setFormData(prev => ({ ...prev, image: imageUrl }))
     } catch (error) {
-      console.error("Failed to upload image:", error)
+      console.error("Failed to process image:", error)
     }
   }
 
