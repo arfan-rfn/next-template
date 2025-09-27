@@ -85,7 +85,7 @@ export function useUpdateProfile() {
         throw new Error('No authentication token found')
       }
 
-      const response = await fetch(`${env.NEXT_PUBLIC_API_URL}/user/profile`, {
+      const response = await fetch(`${env.NEXT_PUBLIC_API_URL}/user`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${session.data.session.token}`,

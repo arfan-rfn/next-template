@@ -1,7 +1,8 @@
-import { useState, useCallback } from 'react'
+import { useCallback } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { apiClient, APIError } from '@/lib/api/client'
 import { toast } from 'sonner'
+import { useUploadStore } from '@/stores/upload-store'
 
 interface UploadRequestData {
   fileName: string
@@ -24,96 +25,156 @@ interface UploadResponse {
 }
 
 interface ConfirmUploadResponse {
-  success: boolean
-  file: {
-    id: string
+  json: {
+    success: boolean
+    fileId: string
     url: string
     publicUrl?: string
-    metadata: Record<string, any>
-    status: string
   }
+  status: number
+  success: boolean
 }
 
-export interface FileUploadState {
-  isUploading: boolean
-  progress: number
-  error: string | null
-  uploadedFile: ConfirmUploadResponse['file'] | null
-}
+type ProgressCallback = (progress: number) => void
 
-export function useFileUpload() {
-  const [uploadState, setUploadState] = useState<FileUploadState>({
-    isUploading: false,
-    progress: 0,
-    error: null,
-    uploadedFile: null,
-  })
+const uploadToStorage = (
+  file: File,
+  uploadUrl: string,
+  onProgress?: ProgressCallback
+): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
 
-  const requestUploadMutation = useMutation({
-    mutationFn: async (data: UploadRequestData): Promise<UploadResponse> => {
-      return apiClient.post<UploadResponse>('/upload/request', data)
-    },
-    onError: (error) => {
-      const errorMessage = error instanceof APIError
-        ? `Upload request failed: ${error.message}`
-        : 'Failed to request upload URL'
-      setUploadState(prev => ({ ...prev, error: errorMessage }))
-      toast.error(errorMessage)
-    },
-  })
+    xhr.upload.addEventListener('progress', (event) => {
+      if (event.lengthComputable && onProgress) {
+        const progress = Math.round((event.loaded / event.total) * 100)
+        onProgress(progress)
+      }
+    })
 
-  const confirmUploadMutation = useMutation({
-    mutationFn: async (uploadId: string): Promise<ConfirmUploadResponse> => {
-      return apiClient.post<ConfirmUploadResponse>(`/upload/confirm/${uploadId}`)
-    },
-    onError: (error) => {
-      const errorMessage = error instanceof APIError
-        ? `Upload confirmation failed: ${error.message}`
-        : 'Failed to confirm upload'
-      setUploadState(prev => ({ ...prev, error: errorMessage }))
-      toast.error(errorMessage)
-    },
-  })
-
-  const uploadToStorage = useCallback(async (file: File, uploadUrl: string): Promise<void> => {
-    try {
-      // Simulate progress during upload since fetch doesn't provide upload progress
-      const progressInterval = setInterval(() => {
-        setUploadState(prev => {
-          const newProgress = Math.min(prev.progress + Math.random() * 20, 90)
-          return { ...prev, progress: Math.round(newProgress) }
-        })
-      }, 200)
-
-      
-      const uploadResponse = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': file.type
-        },
-        body: file // The actual File object
-      })
-
-      clearInterval(progressInterval)
-
-      if (!uploadResponse.ok) {
-        const errorText = await uploadResponse.text().catch(() => 'Unknown error')
+    xhr.addEventListener('load', () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        onProgress?.(100)
+        resolve()
+      } else {
+        const errorText = xhr.responseText || 'Unknown error'
         console.error('Upload failed:', {
-          status: uploadResponse.status,
-          statusText: uploadResponse.statusText,
+          status: xhr.status,
+          statusText: xhr.statusText,
           errorText,
           url: uploadUrl
         })
-        throw new Error(`Upload failed with status ${uploadResponse.status}: ${uploadResponse.statusText}`)
+        reject(new Error(`Upload failed with status ${xhr.status}: ${xhr.statusText}`))
       }
+    })
 
-      // Set progress to 100% when upload completes
-      setUploadState(prev => ({ ...prev, progress: 100 }))
-    } catch (error) {
-      console.error('Upload error:', error)
-      throw error
+    xhr.addEventListener('error', () => {
+      console.error('Upload error: Network error occurred')
+      reject(new Error('Network error occurred during upload'))
+    })
+
+    xhr.addEventListener('abort', () => {
+      console.error('Upload aborted')
+      reject(new Error('Upload was aborted'))
+    })
+
+    xhr.open('PUT', uploadUrl)
+    xhr.setRequestHeader('Content-Type', file.type)
+    xhr.send(file)
+  })
+}
+
+let uploadIdCounter = 0
+const generateUploadId = (): string => {
+  return `upload_${Date.now()}_${++uploadIdCounter}`
+}
+
+export function useFileUpload() {
+  const {
+    addUpload,
+    updateProgress,
+    setUploadStatus,
+    setUploadedUrl,
+    removeUpload,
+    clearCompleted,
+    clearAll,
+    getAllUploads,
+    getTotalProgress,
+    hasActiveUploads
+  } = useUploadStore()
+
+  const uploadMutation = useMutation({
+    mutationFn: async ({
+      file,
+      uploadId,
+      options = {}
+    }: {
+      file: File
+      uploadId: string
+      options?: {
+        visibility?: 'private' | 'public' | 'unlisted' | 'shared'
+        generatePublicUrl?: boolean
+      }
+    }) => {
+      addUpload(uploadId, file.name, file.size)
+      setUploadStatus(uploadId, 'uploading')
+
+      try {
+        const uploadRequest: UploadRequestData = {
+          fileName: file.name,
+          fileType: file.type,
+          fileSize: file.size,
+          visibility: options.visibility || 'private',
+          generatePublicUrl: options.generatePublicUrl || false,
+        }
+
+        const uploadResponse = await apiClient.post<UploadResponse>('/upload/request', uploadRequest)
+        const { uploadId: serverId, uploadUrl, maxSize } = uploadResponse.json
+
+        if (file.size > maxSize) {
+          throw new Error(`File size (${Math.round(file.size / 1024 / 1024)}MB) exceeds maximum allowed size (${Math.round(maxSize / 1024 / 1024)}MB)`)
+        }
+
+        await uploadToStorage(file, uploadUrl, (progress) => {
+          updateProgress(uploadId, progress)
+        })
+
+        const confirmResponse = await apiClient.post<ConfirmUploadResponse>(`/upload/confirm/${serverId}`)
+
+        if (!confirmResponse.success || !confirmResponse.json.success) {
+          throw new Error('Upload confirmation failed')
+        }
+
+        // Extract data from the nested json property
+        const { fileId, url, publicUrl } = confirmResponse.json
+
+        // Set the uploaded URL - prefer publicUrl if available
+        const uploadedUrl = publicUrl || url || fileId
+        setUploadedUrl(uploadId, uploadedUrl)
+
+        setUploadStatus(uploadId, 'completed')
+        toast.success(`${file.name} uploaded successfully!`)
+
+        // Return file data in expected format
+        return {
+          id: fileId,
+          url: url,
+          publicUrl: publicUrl,
+          metadata: {},
+          status: 'completed'
+        }
+      } catch (error) {
+        const errorMessage = error instanceof APIError
+          ? error.message
+          : error instanceof Error
+          ? error.message
+          : 'Upload failed'
+        setUploadStatus(uploadId, 'error', errorMessage)
+        toast.error(`Failed to upload ${file.name}: ${errorMessage}`)
+        throw error
+      }
     }
-  }, [])
+  })
 
   const uploadFile = useCallback(async (
     file: File,
@@ -121,78 +182,62 @@ export function useFileUpload() {
       visibility?: 'private' | 'public' | 'unlisted' | 'shared'
       generatePublicUrl?: boolean
     } = {}
-  ): Promise<ConfirmUploadResponse['file'] | null> => {
+  ) => {
+    const uploadId = generateUploadId()
     try {
-      setUploadState({
-        isUploading: true,
-        progress: 0,
-        error: null,
-        uploadedFile: null,
-      })
-
-      // Step 1: Request upload URL
-      const uploadRequest: UploadRequestData = {
-        fileName: file.name,
-        fileType: file.type,
-        fileSize: file.size,
-        visibility: options.visibility || 'private',
-        generatePublicUrl: options.generatePublicUrl || false,
-      }
-
-      const uploadResponse = await requestUploadMutation.mutateAsync(uploadRequest)
-
-      // Extract data from the wrapped response
-      const { uploadId, uploadUrl, maxSize } = uploadResponse.json
-
-      // Validate file size
-      if (file.size > maxSize) {
-        throw new Error(`File size (${Math.round(file.size / 1024 / 1024)}MB) exceeds maximum allowed size (${Math.round(maxSize / 1024 / 1024)}MB)`)
-      }
-
-      // Step 2: Upload file to storage
-      await uploadToStorage(file, uploadUrl)
-
-      // Step 3: Confirm upload
-      const confirmResponse = await confirmUploadMutation.mutateAsync(uploadId)
-
-      if (!confirmResponse.success) {
-        throw new Error('Upload confirmation failed')
-      }
-
-      setUploadState(prev => ({
-        ...prev,
-        isUploading: false,
-        progress: 100,
-        uploadedFile: confirmResponse.file,
-      }))
-
-      toast.success('File uploaded successfully!')
-      return confirmResponse.file
-
+      return await uploadMutation.mutateAsync({ file, uploadId, options })
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Upload failed'
-      setUploadState(prev => ({
-        ...prev,
-        isUploading: false,
-        error: errorMessage,
-      }))
-      toast.error(errorMessage)
       return null
     }
-  }, [requestUploadMutation, confirmUploadMutation, uploadToStorage])
+  }, [uploadMutation])
+
+  const uploadMultipleFiles = useCallback(async (
+    files: FileList | File[],
+    options: {
+      visibility?: 'private' | 'public' | 'unlisted' | 'shared'
+      generatePublicUrl?: boolean
+    } = {}
+  ) => {
+    const fileArray = Array.from(files)
+    const results: Array<any> = []
+
+    for (const file of fileArray) {
+      const uploadId = generateUploadId()
+      try {
+        const result = await uploadMutation.mutateAsync({ file, uploadId, options })
+        results.push(result)
+      } catch (error) {
+        results.push(null)
+      }
+    }
+
+    return results
+  }, [uploadMutation])
 
   const resetUpload = useCallback(() => {
-    setUploadState({
-      isUploading: false,
-      progress: 0,
-      error: null,
-      uploadedFile: null,
-    })
-  }, [])
+    clearAll()
+    uploadMutation.reset()
+  }, [clearAll, uploadMutation])
+
+  const uploads = getAllUploads()
+  const currentUpload = uploads.find(u => u.status === 'uploading') || uploads[0]
 
   return {
     uploadFile,
+    uploadMultipleFiles,
     resetUpload,
-    ...uploadState,
+    removeUpload,
+    clearCompleted,
+    clearAll,
+
+    uploads,
+    currentUpload,
+    totalProgress: getTotalProgress(),
+    hasActiveUploads: hasActiveUploads(),
+    isUploading: uploadMutation.isPending || hasActiveUploads(),
+
+    progress: currentUpload?.progress || 0,
+    error: uploadMutation.error instanceof Error ? uploadMutation.error.message : null,
+    uploadedFile: uploadMutation.data || null,
   }
 }
