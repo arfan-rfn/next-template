@@ -2,11 +2,11 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
   DialogDescription,
   DialogFooter
 } from "@/components/ui/dialog"
@@ -17,6 +17,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Icons } from "@/components/icons"
 import { useAuth } from "@/lib/hooks/use-auth"
 import { useUpdateProfile } from "@/lib/hooks/use-account"
+import { useFileUpload } from "@/lib/hooks/use-file-upload"
+import { toast } from "sonner"
 
 interface ProfileEditDialogProps {
   open: boolean
@@ -33,11 +35,14 @@ export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps
   const router = useRouter()
   const { user, refresh } = useAuth()
   const updateProfileMutation = useUpdateProfile()
+  const { uploadFile, isUploading, progress, error: uploadError, resetUpload } = useFileUpload()
   const [formData, setFormData] = useState<ProfileFormData>({
     name: user?.name || "",
     bio: "", // Add bio field to user data later
     image: user?.image || undefined
   })
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
   const handleInputChange = (field: keyof ProfileFormData, value: string) => {
     setFormData(prev => ({
@@ -50,27 +55,75 @@ export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps
     const file = event.target.files?.[0]
     if (!file) return
 
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file')
+      return
+    }
+
+    // Validate file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024
+    if (file.size > maxSize) {
+      toast.error('Image must be smaller than 10MB')
+      return
+    }
+
     try {
-      // Create local preview URL for the selected image
+      // Reset any previous upload state
+      resetUpload()
+
+      // Create local preview URL for immediate display
       const imageUrl = URL.createObjectURL(file)
+      setSelectedFile(file)
+      setPreviewUrl(imageUrl)
+
+      // Store the preview in formData temporarily
       setFormData(prev => ({ ...prev, image: imageUrl }))
+
     } catch (error) {
       console.error("Failed to process image:", error)
+      toast.error('Failed to process image')
     }
   }
 
   const handleSave = async () => {
     try {
+      let imageUrl = formData.image
+
+      // If there's a selected file, upload it first
+      if (selectedFile) {
+        const uploadedFile = await uploadFile(selectedFile, {
+          visibility: 'public',
+          generatePublicUrl: true,
+        })
+
+        if (!uploadedFile) {
+          throw new Error('Failed to upload image')
+        }
+
+        imageUrl = uploadedFile.publicUrl || uploadedFile.url
+
+        // Clean up the preview URL
+        if (previewUrl) {
+          URL.revokeObjectURL(previewUrl)
+          setPreviewUrl(null)
+        }
+      }
+
       await updateProfileMutation.mutateAsync({
         name: formData.name,
         bio: formData.bio,
-        image: formData.image,
+        image: imageUrl,
         profileCompleted: true
       })
-      
+
       // Refresh user data
       await refresh()
-      
+
+      // Reset file upload state
+      setSelectedFile(null)
+      resetUpload()
+
       // Close dialog and navigate back to dashboard
       onOpenChange(false)
       router.push('/dashboard')
@@ -94,7 +147,7 @@ export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps
             Update your profile information and settings.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-4 py-4">
           {/* Profile Picture */}
           <div className="flex flex-col items-center space-y-4">
@@ -104,10 +157,10 @@ export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps
                 <Icons.User className="h-8 w-8" />
               </AvatarFallback>
             </Avatar>
-            
+
             <div className="flex flex-col items-center space-y-2">
-              <Label htmlFor="image-upload" className="cursor-pointer">
-                <Button variant="outline" size="sm" asChild>
+              <Label htmlFor="image-upload" className={isUploading ? "cursor-not-allowed" : "cursor-pointer"}>
+                <Button variant="outline" size="sm" asChild disabled={isUploading}>
                   <span>
                     <Icons.Edit className="mr-2 h-4 w-4" />
                     Change Picture
@@ -119,11 +172,31 @@ export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps
                 type="file"
                 accept="image/*"
                 onChange={handleImageUpload}
+                disabled={isUploading}
                 className="sr-only"
               />
-              <p className="text-xs text-muted-foreground text-center">
-                Upload a new profile picture (JPG, PNG)
-              </p>
+              {isUploading && (
+                <div className="text-xs text-muted-foreground text-center space-y-1">
+                  <div className="flex items-center justify-center space-x-2">
+                    <Icons.Loader2 className="h-3 w-3 animate-spin" />
+                    <span>Uploading... {progress}%</span>
+                  </div>
+                  <div className="w-20 bg-gray-200 rounded-full h-1">
+                    <div
+                      className="bg-blue-600 h-1 rounded-full transition-all duration-300"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+              {uploadError && (
+                <p className="text-xs text-red-600 text-center">{uploadError}</p>
+              )}
+              {!isUploading && !uploadError && (
+                <p className="text-xs text-muted-foreground text-center">
+                  Upload a new profile picture (JPG, PNG, max 10MB)
+                </p>
+              )}
             </div>
           </div>
 
@@ -173,20 +246,20 @@ export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps
           <Button
             variant="outline"
             onClick={handleCancel}
-            disabled={updateProfileMutation.isPending}
+            disabled={updateProfileMutation.isPending || isUploading}
             className="w-full sm:w-auto"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSave}
-            disabled={updateProfileMutation.isPending}
+            disabled={updateProfileMutation.isPending || isUploading}
             className="w-full sm:w-auto"
           >
-            {updateProfileMutation.isPending ? (
+            {(updateProfileMutation.isPending || isUploading) ? (
               <>
                 <Icons.Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
+                {isUploading ? `Uploading... ${progress}%` : 'Saving...'}
               </>
             ) : (
               <>
