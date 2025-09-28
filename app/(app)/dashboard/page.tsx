@@ -6,10 +6,12 @@ import { useAuth } from "@/lib/hooks/use-auth"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { Icons } from "@/components/icons"
+import Image from "next/image"
 
 export default function DashboardPage() {
   const { user, isAuthenticated, isLoading } = useAuth()
   const router = useRouter()
+
 
   // Show welcome modal for users with incomplete profiles
   useEffect(() => {
@@ -18,13 +20,28 @@ export default function DashboardPage() {
     }
   }, [user, isAuthenticated, isLoading, router])
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <Icons.Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+
   return (
     <div className="min-h-screen p-4">
       <div className="w-full max-w-md mx-auto pt-20">
         <div className="text-center space-y-8">
-          <Avatar className="w-24 h-24 mx-auto">
-            <AvatarImage src={user?.image || undefined} alt={user?.name || user?.email} />
-            <AvatarFallback className="bg-muted">
+          <Avatar className="size-24 mx-auto">
+            <AvatarImage
+              src={user?.image}
+              alt={user?.name || user?.email}
+            />
+            <AvatarFallback className="bg-muted" delayMs={50}>
               <Icons.User className="w-10 h-10 text-muted-foreground" />
             </AvatarFallback>
           </Avatar>

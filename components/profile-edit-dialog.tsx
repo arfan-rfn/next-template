@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import {
   Dialog,
@@ -33,7 +33,7 @@ interface ProfileFormData {
 
 export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps) {
   const router = useRouter()
-  const { user, refresh } = useAuth()
+  const { user, refresh, isLoading } = useAuth()
   const updateProfileMutation = useUpdateProfile()
   const { uploadFile, isUploading, progress, error: uploadError, resetUpload } = useFileUpload()
   const [formData, setFormData] = useState<ProfileFormData>({
@@ -137,6 +137,16 @@ export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps
     onOpenChange(false)
     router.push('/dashboard')
   }
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || "",
+        bio: user.bio || "",
+        image: user.image || undefined
+      })
+    }
+  }, [user])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

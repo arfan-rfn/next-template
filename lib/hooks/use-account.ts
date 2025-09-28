@@ -5,7 +5,7 @@
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { authClient } from '@/lib/auth'
-import { env } from '@/env'
+import { apiClient, APIError } from '@/lib/api/client'
 
 // Account-related types
 export interface DeleteAccountRequest {
@@ -50,29 +50,27 @@ export function useDeleteAccount() {
         throw new Error('No authentication token found')
       }
 
-      const response = await fetch(`${env.NEXT_PUBLIC_API_URL}/user`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${session.data.session.token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ confirmation: data.confirmation }),
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`Failed to delete account: ${response.status} ${errorText}`)
-      }
-
-      return response.json() as Promise<DeleteAccountResponse>
+      return apiClient.delete<DeleteAccountResponse>('/user',
+        { confirmation: data.confirmation },
+        {
+          headers: {
+            'Authorization': `Bearer ${session.data.session.token}`,
+          },
+        }
+      )
     },
     onSuccess: (data) => {
       toast.success(data?.message || 'Account deletion request submitted successfully')
       // Sign out the user after successful deletion request
       authClient.signOut()
     },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Failed to request account deletion')
+    onError: (error) => {
+      const message = error instanceof APIError
+        ? error.message
+        : error instanceof Error
+        ? error.message
+        : 'Failed to request account deletion'
+      toast.error(message)
     },
   })
 }
@@ -85,27 +83,22 @@ export function useUpdateProfile() {
         throw new Error('No authentication token found')
       }
 
-      const response = await fetch(`${env.NEXT_PUBLIC_API_URL}/user`, {
-        method: 'PATCH',
+      return apiClient.patch<UpdateProfileResponse>('/user', data, {
         headers: {
           'Authorization': `Bearer ${session.data.session.token}`,
-          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
       })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`Failed to update profile: ${response.status} ${errorText}`)
-      }
-
-      return response.json() as Promise<UpdateProfileResponse>
     },
     onSuccess: (data) => {
       toast.success(data?.message || 'Profile updated successfully')
     },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Failed to update profile')
+    onError: (error) => {
+      const message = error instanceof APIError
+        ? error.message
+        : error instanceof Error
+        ? error.message
+        : 'Failed to update profile'
+      toast.error(message)
     },
   })
 }
@@ -118,27 +111,25 @@ export function useCompleteProfile() {
         throw new Error('No authentication token found')
       }
 
-      const response = await fetch(`${env.NEXT_PUBLIC_API_URL}/user/complete-profile`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.data.session.token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name: data.name }),
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`Failed to complete profile: ${response.status} ${errorText}`)
-      }
-
-      return response.json() as Promise<CompleteProfileResponse>
+      return apiClient.post<CompleteProfileResponse>('/user/complete-profile',
+        { name: data.name },
+        {
+          headers: {
+            'Authorization': `Bearer ${session.data.session.token}`,
+          },
+        }
+      )
     },
     onSuccess: (data) => {
       toast.success(data?.message || 'Profile completed successfully')
     },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Failed to complete profile')
+    onError: (error) => {
+      const message = error instanceof APIError
+        ? error.message
+        : error instanceof Error
+        ? error.message
+        : 'Failed to complete profile'
+      toast.error(message)
     },
   })
 }

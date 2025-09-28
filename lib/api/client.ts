@@ -107,7 +107,21 @@ export const apiClient = {
     return handleResponse<T>(response)
   },
 
-  delete: async <T>(endpoint: string, options?: FetchOptions): Promise<T> => {
+  patch: async <T>(endpoint: string, data?: any, options?: FetchOptions): Promise<T> => {
+    const response = await fetch(`${baseURL}${endpoint}`, {
+      ...defaultOptions,
+      ...options,
+      method: 'PATCH',
+      headers: {
+        ...defaultOptions.headers,
+        ...options?.headers,
+      },
+      body: data ? JSON.stringify(data) : undefined,
+    })
+    return handleResponse<T>(response)
+  },
+
+  delete: async <T>(endpoint: string, data?: any, options?: FetchOptions): Promise<T> => {
     const response = await fetch(`${baseURL}${endpoint}`, {
       ...defaultOptions,
       ...options,
@@ -116,6 +130,7 @@ export const apiClient = {
         ...defaultOptions.headers,
         ...options?.headers,
       },
+      body: data ? JSON.stringify(data) : undefined,
     })
     return handleResponse<T>(response)
   },

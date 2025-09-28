@@ -82,3 +82,4 @@ Copy `.env.example` to `.env.local` and configure:
 ### Testing
 Currently no test framework is configured. When adding tests, update this section with the testing approach and commands.
 - remember to put the plan doc always inside the /plan directory
+- remember to use api client whenever making any api request. /Users/rfnmac/projects/next-template/lib/api
