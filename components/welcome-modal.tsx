@@ -130,7 +130,7 @@ export function WelcomeModal({ open, onOpenChange }: WelcomeModalProps) {
                     <span>
                       {isUploadingImage ? (
                         <>
-                          <Icons.Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          <Icons.Loader className="mr-2 h-4 w-4 animate-spin" />
                           Uploading...
                         </>
                       ) : (
@@ -179,7 +179,7 @@ export function WelcomeModal({ open, onOpenChange }: WelcomeModalProps) {
               >
                 {isLoading || completeProfileMutation.isPending ? (
                   <>
-                    <Icons.Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Icons.Loader className="mr-2 h-4 w-4 animate-spin" />
                     Completing Profile...
                   </>
                 ) : (

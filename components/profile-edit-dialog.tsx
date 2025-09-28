@@ -188,7 +188,7 @@ export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps
               {isUploading && (
                 <div className="text-xs text-muted-foreground text-center space-y-1">
                   <div className="flex items-center justify-center space-x-2">
-                    <Icons.Loader2 className="h-3 w-3 animate-spin" />
+                    <Icons.Loader className="h-3 w-3 animate-spin" />
                     <span>Uploading... {progress}%</span>
                   </div>
                   <div className="w-20 bg-gray-200 rounded-full h-1">
@@ -268,7 +268,7 @@ export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps
           >
             {(updateProfileMutation.isPending || isUploading) ? (
               <>
-                <Icons.Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Icons.Loader className="mr-2 h-4 w-4 animate-spin" />
                 {isUploading ? `Uploading... ${progress}%` : 'Saving...'}
               </>
             ) : (

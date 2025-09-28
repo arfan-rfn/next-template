@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/hooks/use-auth"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { Icons } from "@/components/icons"
-import Image from "next/image"
+import { ProfileSkeleton } from "@/components/ui/skeletons"
 
 export default function DashboardPage() {
   const { user, isAuthenticated, isLoading } = useAuth()
@@ -21,14 +21,7 @@ export default function DashboardPage() {
   }, [user, isAuthenticated, isLoading, router])
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-2">
-          <Icons.Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    )
+    return <ProfileSkeleton />
   }
 
 

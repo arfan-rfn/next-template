@@ -51,7 +51,7 @@ export function AccountButton() {
 	// Loading state: show skeleton
 	if (isLoading) {
 		return (
-			<div className="animate-pulse rounded-md bg-muted h-10 w-24" />
+			<Icons.Loader className="size-9 p-1 animate-spin text-muted-foreground" />
 		)
 	}
 

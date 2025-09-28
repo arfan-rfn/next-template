@@ -4,16 +4,16 @@ import { useAuthContext } from "@/components/providers/auth-provider"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { 
-  AlertDialog, 
-  AlertDialogAction, 
-  AlertDialogCancel, 
-  AlertDialogContent, 
-  AlertDialogDescription, 
-  AlertDialogFooter, 
-  AlertDialogHeader, 
-  AlertDialogTitle, 
-  AlertDialogTrigger 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
 } from "@/components/ui/alert-dialog"
 import { Icons } from "@/components/icons"
 import { Input } from "@/components/ui/input"
@@ -21,12 +21,13 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useDeleteAccount } from "@/lib/hooks/use-account"
 import { authClient } from "@/lib/auth"
+import { AccountInfoSkeleton } from "@/components/ui/skeletons"
 
 export default function AccountSettingsPage() {
   const { user, isAuthenticated, isLoading } = useAuthContext()
   const router = useRouter()
   const [deleteConfirmation, setDeleteConfirmation] = useState("")
-  
+
   // TanStack Query hooks
   const deleteAccountMutation = useDeleteAccount()
 
@@ -51,14 +52,7 @@ export default function AccountSettingsPage() {
   const isDeleteConfirmed = deleteConfirmation === "DELETE"
 
   if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="animate-pulse space-y-6">
-          <div className="h-8 bg-muted rounded w-64"></div>
-          <div className="h-96 bg-muted rounded"></div>
-        </div>
-      </div>
-    )
+    return <AccountInfoSkeleton />
   }
 
   if (!isAuthenticated) {
@@ -100,10 +94,10 @@ export default function AccountSettingsPage() {
                 <div className="space-y-1 flex-1 min-w-0">
                   <p className="text-sm font-medium">Account Created</p>
                   <p className="text-sm text-muted-foreground">
-                    {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
+                    {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
                     }) : 'Unknown'}
                   </p>
                 </div>
@@ -140,8 +134,8 @@ export default function AccountSettingsPage() {
                 Sign out of your account on this device
               </p>
             </div>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={handleSignOut}
               className="shrink-0 w-full sm:w-auto"
             >
@@ -149,9 +143,9 @@ export default function AccountSettingsPage() {
               Sign Out
             </Button>
           </div>
-          
+
           <Separator />
-          
+
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="space-y-1 min-w-0 flex-1">
               <h4 className="font-medium">Delete Account</h4>
@@ -161,8 +155,8 @@ export default function AccountSettingsPage() {
             </div>
             <AlertDialog onOpenChange={(open) => !open && setDeleteConfirmation("")}>
               <AlertDialogTrigger asChild>
-                <Button 
-                  variant="destructive" 
+                <Button
+                  variant="destructive"
                   className="shrink-0 w-full sm:w-auto"
                   disabled={deleteAccountMutation.isPending}
                 >
@@ -207,14 +201,14 @@ export default function AccountSettingsPage() {
                   <AlertDialogCancel disabled={deleteAccountMutation.isPending}>
                     Cancel
                   </AlertDialogCancel>
-                  <AlertDialogAction 
-                    onClick={handleDeleteAccount} 
+                  <AlertDialogAction
+                    onClick={handleDeleteAccount}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     disabled={deleteAccountMutation.isPending || !isDeleteConfirmed}
                   >
                     {deleteAccountMutation.isPending ? (
                       <>
-                        <Icons.Loader2 className="size-4 mr-2 animate-spin" />
+                        <Icons.Loader className="size-4 mr-2 animate-spin" />
                         Deleting...
                       </>
                     ) : (

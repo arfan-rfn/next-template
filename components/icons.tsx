@@ -43,7 +43,7 @@ export const Icons = {
   Menu: Menu,
   Mail: Mail,
   Home: Home,
-  Loader2: Loader2,
+  Loader: Loader2,
   LogOut: LogOut,
   Settings: Settings,
   Shield: Shield,
