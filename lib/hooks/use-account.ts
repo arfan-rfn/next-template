@@ -2,10 +2,11 @@
  * TanStack Query hooks for account management
  */
 
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { authClient } from '@/lib/auth'
 import { apiClient, APIError } from '@/lib/api/client'
+import { userKeys } from './use-user'
 
 // Account-related types
 export interface DeleteAccountRequest {
@@ -43,6 +44,8 @@ export interface CompleteProfileResponse {
 
 // Mutations
 export function useDeleteAccount() {
+  const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: async (data: DeleteAccountRequest) => {
       const session = await authClient.getSession()
@@ -61,6 +64,8 @@ export function useDeleteAccount() {
     },
     onSuccess: (data) => {
       toast.success(data?.message || 'Account deletion request submitted successfully')
+      // Invalidate user queries
+      queryClient.invalidateQueries({ queryKey: userKeys.all })
       // Sign out the user after successful deletion request
       authClient.signOut()
     },
@@ -76,6 +81,8 @@ export function useDeleteAccount() {
 }
 
 export function useUpdateProfile() {
+  const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: async (data: UpdateProfileRequest) => {
       const session = await authClient.getSession()
@@ -91,6 +98,8 @@ export function useUpdateProfile() {
     },
     onSuccess: (data) => {
       toast.success(data?.message || 'Profile updated successfully')
+      // Invalidate and refetch user queries to get updated data
+      queryClient.invalidateQueries({ queryKey: userKeys.all })
     },
     onError: (error) => {
       const message = error instanceof APIError
@@ -104,6 +113,8 @@ export function useUpdateProfile() {
 }
 
 export function useCompleteProfile() {
+  const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: async (data: CompleteProfileRequest) => {
       const session = await authClient.getSession()
@@ -122,6 +133,8 @@ export function useCompleteProfile() {
     },
     onSuccess: (data) => {
       toast.success(data?.message || 'Profile completed successfully')
+      // Invalidate and refetch user queries to get updated data
+      queryClient.invalidateQueries({ queryKey: userKeys.all })
     },
     onError: (error) => {
       const message = error instanceof APIError

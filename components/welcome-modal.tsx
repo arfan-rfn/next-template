@@ -25,7 +25,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Icons } from "@/components/icons"
-import { useAuth } from "@/lib/hooks/use-auth"
+import { useUser } from "@/lib/hooks/use-user"
 import { useCompleteProfile } from "@/lib/hooks/use-account"
 import { siteConfig } from "@/config/site"
 
@@ -42,7 +42,7 @@ type ProfileFormValues = z.infer<typeof profileSchema>
 
 export function WelcomeModal({ open, onOpenChange }: WelcomeModalProps) {
   const router = useRouter()
-  const { user, refresh } = useAuth()
+  const { data: user, refetch } = useUser()
   const completeProfileMutation = useCompleteProfile()
   const [isLoading, setIsLoading] = useState(false)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
@@ -90,7 +90,7 @@ export function WelcomeModal({ open, onOpenChange }: WelcomeModalProps) {
       })
 
       // Refresh user data
-      await refresh()
+      await refetch()
 
       // Close modal and navigate to dashboard
       onOpenChange(false)

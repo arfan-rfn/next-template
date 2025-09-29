@@ -3,14 +3,19 @@
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuth } from "@/lib/hooks/use-auth"
+import { useUser } from "@/lib/hooks/use-user"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { Icons } from "@/components/icons"
 import { ProfileSkeleton } from "@/components/ui/skeletons"
 
 export default function DashboardPage() {
-  const { user, isAuthenticated, isLoading } = useAuth()
+  const { isAuthenticated, isLoading: authLoading } = useAuth()
+  const { data: user, isLoading: userLoading } = useUser()
   const router = useRouter()
+
+  // Combined loading state
+  const isLoading = authLoading || userLoading
 
 
   // Show welcome modal for users with incomplete profiles

@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useAuthContext } from "@/components/providers/auth-provider"
+import { useUser } from "@/lib/hooks/use-user"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import {
@@ -20,8 +21,12 @@ import { Icons } from "./icons"
  * Responsive and accessible.
  */
 export function AccountButton() {
-	const { user, isAuthenticated, isLoading, signOut, refresh } = useAuthContext()
+	const { isAuthenticated, isLoading: authLoading, signOut, refresh } = useAuthContext()
+	const { data: user, isLoading: userLoading, isError } = useUser()
 	const router = useRouter()
+
+	// Combined loading state
+	const isLoading = authLoading || userLoading
 
 	// Helper: render avatar component
 	const renderAvatar = () => {

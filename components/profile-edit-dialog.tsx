@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Icons } from "@/components/icons"
-import { useAuth } from "@/lib/hooks/use-auth"
+import { useUser } from "@/lib/hooks/use-user"
 import { useUpdateProfile } from "@/lib/hooks/use-account"
 import { useFileUpload } from "@/lib/hooks/use-file-upload"
 import { toast } from "sonner"
@@ -33,7 +33,7 @@ interface ProfileFormData {
 
 export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps) {
   const router = useRouter()
-  const { user, refresh, isLoading } = useAuth()
+  const { data: user, refetch } = useUser()
   const updateProfileMutation = useUpdateProfile()
   const { uploadFile, isUploading, progress, error: uploadError, resetUpload } = useFileUpload()
   const [formData, setFormData] = useState<ProfileFormData>({
@@ -118,7 +118,7 @@ export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps
       })
 
       // Refresh user data
-      await refresh()
+      await refetch()
 
       // Reset file upload state
       setSelectedFile(null)

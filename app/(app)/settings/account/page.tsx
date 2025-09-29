@@ -1,6 +1,7 @@
 "use client"
 
 import { useAuthContext } from "@/components/providers/auth-provider"
+import { useUser } from "@/lib/hooks/use-user"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -24,8 +25,12 @@ import { authClient } from "@/lib/auth"
 import { AccountInfoSkeleton } from "@/components/ui/skeletons"
 
 export default function AccountSettingsPage() {
-  const { user, isAuthenticated, isLoading } = useAuthContext()
+  const { isAuthenticated, isLoading: authLoading } = useAuthContext()
+  const { data: user, isLoading: userLoading } = useUser()
   const router = useRouter()
+
+  // Combined loading state
+  const isLoading = authLoading || userLoading
   const [deleteConfirmation, setDeleteConfirmation] = useState("")
 
   // TanStack Query hooks
