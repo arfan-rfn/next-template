@@ -7,17 +7,19 @@ import { useQuery } from '@tanstack/react-query'
 import { apiClient, APIError } from '@/lib/api/client'
 import { authClient } from '@/lib/auth'
 
-// Enhanced user type with comprehensive profile data
+// Enhanced user type with comprehensive profile data matching API response
 export interface User {
   id: string
   email: string
   name?: string
+  emailVerified: boolean
   image?: string
-  bio?: string
+  avatarUrl?: string | null
   profileCompleted?: boolean
   createdAt: string
   updatedAt: string
-  // Add other fields that come from your /user endpoint
+  firstLoginAt?: string
+  profileCompletedAt?: string | null
 }
 
 export interface UseUserOptions {

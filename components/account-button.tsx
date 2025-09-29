@@ -22,7 +22,7 @@ import { Icons } from "./icons"
  */
 export function AccountButton() {
 	const { isAuthenticated, isLoading: authLoading, signOut, refresh } = useAuthContext()
-	const { data: user, isLoading: userLoading, isError } = useUser()
+	const { data: user, isLoading: userLoading } = useUser()
 	const router = useRouter()
 
 	// Combined loading state
@@ -33,7 +33,7 @@ export function AccountButton() {
 		return (
 			<Avatar className="size-8">
 				<AvatarImage
-					src={user?.image || undefined}
+					src={user?.avatarUrl || user?.image || undefined}
 					alt={user?.name || user?.email || "User"}
 				/>
 				<AvatarFallback className="text-xs font-medium">

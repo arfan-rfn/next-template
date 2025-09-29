@@ -39,7 +39,7 @@ export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps
   const [formData, setFormData] = useState<ProfileFormData>({
     name: user?.name || "",
     bio: "", // Add bio field to user data later
-    image: user?.image || undefined
+    image: user?.avatarUrl || user?.image || undefined
   })
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -142,8 +142,8 @@ export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps
     if (user) {
       setFormData({
         name: user.name || "",
-        bio: user.bio || "",
-        image: user.image || undefined
+        bio: "", // Bio not available in current API response
+        image: user.avatarUrl || user.image || undefined
       })
     }
   }, [user])
