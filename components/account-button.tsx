@@ -33,7 +33,7 @@ export function AccountButton() {
 		return (
 			<Avatar className="size-8">
 				<AvatarImage
-					src={user?.avatarUrl || user?.image || undefined}
+					src={user?.avatarUrl || undefined}
 					alt={user?.name || user?.email || "User"}
 				/>
 				<AvatarFallback className="text-xs font-medium">

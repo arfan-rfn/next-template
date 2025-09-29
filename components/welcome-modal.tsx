@@ -118,7 +118,7 @@ export function WelcomeModal({ open, onOpenChange }: WelcomeModalProps) {
             {/* Profile Picture */}
             <div className="flex flex-col items-center space-y-4">
               <Avatar className="h-20 w-20">
-                <AvatarImage src={selectedImage || user?.avatarUrl || user?.image} alt={form.watch("name") || user?.name || user?.email} />
+                <AvatarImage src={selectedImage || user?.avatarUrl || undefined} alt={form.watch("name") || user?.name || user?.email} />
                 <AvatarFallback className="bg-muted text-lg">
                   <Icons.User className="h-8 w-8" />
                 </AvatarFallback>

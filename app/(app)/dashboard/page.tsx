@@ -36,7 +36,7 @@ export default function DashboardPage() {
         <div className="text-center space-y-8">
           <Avatar className="size-24 mx-auto">
             <AvatarImage
-              src={user?.avatarUrl || user?.image}
+              src={user?.avatarUrl || undefined}
               alt={user?.name || user?.email}
             />
             <AvatarFallback className="bg-muted" delayMs={50}>

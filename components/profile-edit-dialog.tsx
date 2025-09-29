@@ -39,7 +39,7 @@ export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps
   const [formData, setFormData] = useState<ProfileFormData>({
     name: user?.name || "",
     bio: "", // Add bio field to user data later
-    image: user?.avatarUrl || user?.image || undefined
+    image: user?.avatarUrl || undefined
   })
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -101,7 +101,8 @@ export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps
           throw new Error('Failed to upload image')
         }
 
-        imageUrl = uploadedFile.publicUrl || uploadedFile.url
+        // Use fileId instead of full URL
+        imageUrl = uploadedFile.id
 
         // Clean up the preview URL
         if (previewUrl) {
@@ -143,7 +144,7 @@ export function ProfileEditDialog({ open, onOpenChange }: ProfileEditDialogProps
       setFormData({
         name: user.name || "",
         bio: "", // Bio not available in current API response
-        image: user.avatarUrl || user.image || undefined
+        image: user.avatarUrl || undefined
       })
     }
   }, [user])

@@ -22,7 +22,7 @@ export interface DeleteAccountResponse {
 export interface UpdateProfileRequest {
   name?: string
   bio?: string
-  image?: string
+  image?: string // fileId for new uploads, or existing URL/fileId for unchanged
   profileCompleted?: boolean
 }
 

@@ -13,8 +13,7 @@ export interface User {
   email: string
   name?: string
   emailVerified: boolean
-  image?: string
-  avatarUrl?: string | null
+  avatarUrl?: string | null // Full URL constructed by backend from fileId
   profileCompleted?: boolean
   createdAt: string
   updatedAt: string
