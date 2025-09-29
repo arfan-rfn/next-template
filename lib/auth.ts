@@ -59,7 +59,7 @@ export const auth = {
 	// Sign in with magic link
 	signInWithMagicLink: async (email: string, callbackURL?: string) => {
 		const absoluteCallbackURL = toAbsoluteUrl(callbackURL || "/dashboard")
-		const newUserCallbackURL = toAbsoluteUrl("/welcome")
+		const newUserCallbackURL = toAbsoluteUrl("/dashboard/welcome")
 		const errorCallbackURL = toAbsoluteUrl("/auth/sign-in")
 
 
