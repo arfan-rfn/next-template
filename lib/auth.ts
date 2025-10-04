@@ -9,9 +9,14 @@ export const authClient = createAuthClient({
 		magicLinkClient()
 	],
 	fetchOptions: {
-		credentials: 'include'
+		credentials: 'include',
+		// Cache responses to avoid duplicate requests
+		cache: 'default' as RequestCache,
 	},
 })
+
+// Export the useSession hook from Better Auth
+export const useSession = authClient.useSession
 
 // Export auth types for better TypeScript support
 export type AuthUser = Awaited<ReturnType<typeof authClient.accountInfo>>

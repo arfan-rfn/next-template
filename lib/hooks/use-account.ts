@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { authClient } from '@/lib/auth'
 import { apiClient, APIError } from '@/lib/api/client'
 import { userKeys } from './use-user'
+import { useAuthContext } from '@/components/providers/auth-provider'
 
 // Account-related types
 export interface DeleteAccountRequest {
@@ -45,11 +46,12 @@ export interface CompleteProfileResponse {
 // Mutations
 export function useDeleteAccount() {
   const queryClient = useQueryClient()
+  const { getAuthToken } = useAuthContext()
 
   return useMutation({
     mutationFn: async (data: DeleteAccountRequest) => {
-      const session = await authClient.getSession()
-      if (!session?.data?.session?.token) {
+      const token = getAuthToken()
+      if (!token) {
         throw new Error('No authentication token found')
       }
 
@@ -57,7 +59,7 @@ export function useDeleteAccount() {
         { confirmation: data.confirmation },
         {
           headers: {
-            'Authorization': `Bearer ${session.data.session.token}`,
+            'Authorization': `Bearer ${token}`,
           },
         }
       )
@@ -82,17 +84,18 @@ export function useDeleteAccount() {
 
 export function useUpdateProfile() {
   const queryClient = useQueryClient()
+  const { getAuthToken } = useAuthContext()
 
   return useMutation({
     mutationFn: async (data: UpdateProfileRequest) => {
-      const session = await authClient.getSession()
-      if (!session?.data?.session?.token) {
+      const token = getAuthToken()
+      if (!token) {
         throw new Error('No authentication token found')
       }
 
       return apiClient.patch<UpdateProfileResponse>('/user', data, {
         headers: {
-          'Authorization': `Bearer ${session.data.session.token}`,
+          'Authorization': `Bearer ${token}`,
         },
       })
     },
@@ -114,11 +117,12 @@ export function useUpdateProfile() {
 
 export function useCompleteProfile() {
   const queryClient = useQueryClient()
+  const { getAuthToken } = useAuthContext()
 
   return useMutation({
     mutationFn: async (data: CompleteProfileRequest) => {
-      const session = await authClient.getSession()
-      if (!session?.data?.session?.token) {
+      const token = getAuthToken()
+      if (!token) {
         throw new Error('No authentication token found')
       }
 
@@ -126,7 +130,7 @@ export function useCompleteProfile() {
         { name: data.name },
         {
           headers: {
-            'Authorization': `Bearer ${session.data.session.token}`,
+            'Authorization': `Bearer ${token}`,
           },
         }
       )

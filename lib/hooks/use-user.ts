@@ -5,7 +5,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { apiClient, APIError } from '@/lib/api/client'
-import { authClient } from '@/lib/auth'
+import { useAuthContext } from '@/components/providers/auth-provider'
 
 // Enhanced user type with comprehensive profile data matching API response
 export interface User {
@@ -34,19 +34,21 @@ export interface UseUserOptions {
  * @param options Configuration options for the query
  */
 export function useUser() {
+  // Get auth token from context instead of calling getSession
+  const { getAuthToken, isAuthenticated } = useAuthContext()
 
   return useQuery({
     queryKey: ['user'],
     queryFn: async (): Promise<User> => {
-      // Get authentication token from session
-      const session = await authClient.getSession()
-      if (!session?.data?.session?.token) {
+      // Get authentication token from cached context
+      const token = getAuthToken()
+      if (!token) {
         throw new Error('No authentication token found')
       }
 
       return apiClient.get<User>('/user', {
         headers: {
-          'Authorization': `Bearer ${session.data.session.token}`,
+          'Authorization': `Bearer ${token}`,
         },
       })
     },
@@ -61,8 +63,8 @@ export function useUser() {
       // Retry up to 2 times for other errors
       return failureCount < 2
     },
-    // Only run query if we have a session
-    enabled: true,
+    // Only run query if user is authenticated
+    enabled: isAuthenticated,
   })
 }
 
