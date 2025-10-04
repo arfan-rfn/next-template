@@ -46,10 +46,16 @@ This is a Next.js 15+ application using App Router with the following key archit
   - `(app)/` - Main app routes (auth, blog, dashboard, etc.)
   - `api/` - API routes (currently S3 integration)
 - `components/` - React components (prefer RSC, minimize client components)
+  - `ui/` - shadcn UI components
+  - `providers/` - Context providers
+- `hooks/` - Custom React hooks (React Query hooks, etc.)
 - `lib/` - Utilities, integrations, and shared functions
+  - `api/` - API client for external Hono backend
+  - `types/` - TypeScript type definitions
 - `stores/` - Zustand state management
 - `config/` - App configuration and constants
-- `types/` - TypeScript type definitions
+- `styles/` - Global styles
+- `public/` - Static assets
 
 ### Key Patterns
 1. **Server Components by Default**: Use client components only when necessary
@@ -57,6 +63,12 @@ This is a Next.js 15+ application using App Router with the following key archit
 3. **Error Handling**: Use guard clauses and proper error boundaries
 4. **Data Validation**: Always validate with Zod schemas
 5. **Environment Variables**: Validated with T3 Env in `lib/env.js`
+
+### API Architecture
+- **Backend**: External Hono API hosted on Cloudflare Workers
+- **API Client**: Located in `lib/api/` for all server communication
+- **No Server Actions**: This template uses external API instead of Next.js Server Actions
+- **Data Fetching**: TanStack Query hooks in `hooks/` for API calls
 
 ### Authentication Flow
 - Better Auth setup in `lib/auth.ts`

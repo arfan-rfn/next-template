@@ -15,9 +15,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Icons } from "@/components/icons"
-import { useUser } from "@/lib/hooks/use-user"
-import { useUpdateProfile } from "@/lib/hooks/use-account"
-import { useFileUpload } from "@/lib/hooks/use-file-upload"
+import { useUser } from "@/hooks/use-user"
+import { useUpdateProfile } from "@/hooks/use-account"
+import { useFileUpload } from "@/hooks/use-file-upload"
 import { toast } from "sonner"
 
 interface ProfileEditDialogProps {

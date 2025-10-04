@@ -2,8 +2,8 @@
 
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useAuth } from "@/lib/hooks/use-auth"
-import { useUser } from "@/lib/hooks/use-user"
+import { useAuth } from "@/hooks/use-auth"
+import { useUser } from "@/hooks/use-user"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { Icons } from "@/components/icons"

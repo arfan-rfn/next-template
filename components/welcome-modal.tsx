@@ -25,8 +25,8 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Icons } from "@/components/icons"
-import { useUser } from "@/lib/hooks/use-user"
-import { useCompleteProfile } from "@/lib/hooks/use-account"
+import { useUser } from "@/hooks/use-user"
+import { useCompleteProfile } from "@/hooks/use-account"
 import { siteConfig } from "@/config/site"
 
 interface WelcomeModalProps {

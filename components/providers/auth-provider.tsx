@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, ReactNode } from "react"
-import { useAuth } from "@/lib/hooks/use-auth"
+import { useAuth } from "@/hooks/use-auth"
 
 interface AuthContextType {
   user: any

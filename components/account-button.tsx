@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useAuthContext } from "@/components/providers/auth-provider"
-import { useUser } from "@/lib/hooks/use-user"
+import { useUser } from "@/hooks/use-user"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import {

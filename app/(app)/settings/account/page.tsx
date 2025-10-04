@@ -1,7 +1,7 @@
 "use client"
 
 import { useAuthContext } from "@/components/providers/auth-provider"
-import { useUser } from "@/lib/hooks/use-user"
+import { useUser } from "@/hooks/use-user"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -20,7 +20,7 @@ import { Icons } from "@/components/icons"
 import { Input } from "@/components/ui/input"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { useDeleteAccount } from "@/lib/hooks/use-account"
+import { useDeleteAccount } from "@/hooks/use-account"
 import { authClient } from "@/lib/auth"
 import { AccountInfoSkeleton } from "@/components/ui/skeletons"
 

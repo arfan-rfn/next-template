@@ -2,7 +2,7 @@
 
 import { ReactNode, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/lib/hooks/use-auth"
+import { useAuth } from "@/hooks/use-auth"
 import { Icons } from "@/components/icons"
 import { ProfileSkeleton } from "@/components/ui/skeletons"
 
