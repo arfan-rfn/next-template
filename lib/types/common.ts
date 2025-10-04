@@ -8,12 +8,11 @@ export interface BaseResponse {
   message: string
 }
 
-// SuperJSON response wrapper type
-export interface SuperJSONResponse<T = any> {
-  json: T
-  meta?: {
-    values?: Record<string, string[]>
-  }
+// Standard API response wrapper type
+export interface APIResponse<T> {
+  data: T
+  status: number
+  success: boolean
 }
 
 export interface PaginationParams {

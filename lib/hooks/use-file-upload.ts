@@ -13,26 +13,18 @@ interface UploadRequestData {
 }
 
 interface UploadResponse {
-  json: {
-    uploadId: string
-    uploadUrl: string
-    storageKey: string
-    expiresAt: string
-    maxSize: number
-  }
-  status: number
-  success: boolean
+  uploadId: string
+  uploadUrl: string
+  storageKey: string
+  expiresAt: string
+  maxSize: number
 }
 
 interface ConfirmUploadResponse {
-  json: {
-    success: boolean
-    fileId: string
-    url: string
-    publicUrl?: string
-  }
-  status: number
   success: boolean
+  fileId: string
+  url: string
+  publicUrl?: string
 }
 
 type ProgressCallback = (progress: number) => void
@@ -129,7 +121,7 @@ export function useFileUpload() {
         }
 
         const uploadResponse = await apiClient.post<UploadResponse>('/upload/request', uploadRequest)
-        const { uploadId: serverId, uploadUrl, maxSize } = uploadResponse.json
+        const { uploadId: serverId, uploadUrl, maxSize } = uploadResponse
 
         if (file.size > maxSize) {
           throw new Error(`File size (${Math.round(file.size / 1024 / 1024)}MB) exceeds maximum allowed size (${Math.round(maxSize / 1024 / 1024)}MB)`)
@@ -141,12 +133,12 @@ export function useFileUpload() {
 
         const confirmResponse = await apiClient.post<ConfirmUploadResponse>(`/upload/confirm/${serverId}`)
 
-        if (!confirmResponse.success || !confirmResponse.json.success) {
+        if (!confirmResponse.success) {
           throw new Error('Upload confirmation failed')
         }
 
-        // Extract data from the nested json property
-        const { fileId, url, publicUrl } = confirmResponse.json
+        // Extract data directly from the response
+        const { fileId, url, publicUrl } = confirmResponse
 
         // Set the uploaded URL - prefer publicUrl if available
         const uploadedUrl = publicUrl || url || fileId
