@@ -23,8 +23,8 @@ export default function ProfileEditPage() {
     <div className="min-h-screen p-4">
       <div className="w-full max-w-md mx-auto pt-20">
         <h1 className="text-2xl font-semibold text-center mb-8">Edit Profile</h1>
-        <ProfileEditDialog 
-          open={open} 
+        <ProfileEditDialog
+          open={open}
           onOpenChange={handleOpenChange}
         />
       </div>
