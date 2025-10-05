@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { usePathname, useSearchParams } from "next/navigation"
 import posthog from "posthog-js"
 import { env } from "@/env"
@@ -14,6 +14,7 @@ export function PostHogProvider({ children }: PostHogProviderProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const { user, isAuthenticated } = useAuthContext()
+  const lastTrackedUrl = useRef<string>("")
 
   // Initialize PostHog
   useEffect(() => {
@@ -23,20 +24,30 @@ export function PostHogProvider({ children }: PostHogProviderProps) {
 
       posthog.init(env.NEXT_PUBLIC_POSTHOG_KEY, {
         api_host: apiHost,
-        capture_pageview: false, // We'll do it manually
+        capture_pageview: false, // Manual pageview tracking
+        capture_pageleave: false, // Disable pageleave to reduce events
+        autocapture: false, // Disable autocapture
         person_profiles: "identified_only", // Only track logged-in users
+        disable_web_experiments: true, // Disable if not using experiments
+        disable_surveys: true, // Disable if not using surveys
+        capture_performance: false, // Disable web vitals tracking
       })
     }
   }, [])
 
-  // Track pageviews
+  // Track pageviews with deduplication
   useEffect(() => {
     if (pathname && posthog.__loaded) {
       let url = window.origin + pathname
       if (searchParams.toString()) {
         url = url + `?${searchParams.toString()}`
       }
-      posthog.capture("$pageview", { $current_url: url })
+
+      // Only track if URL actually changed (prevents duplicate pageviews)
+      if (url !== lastTrackedUrl.current) {
+        lastTrackedUrl.current = url
+        posthog.capture("$pageview", { $current_url: url })
+      }
     }
   }, [pathname, searchParams])
 
