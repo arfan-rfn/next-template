@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { Suspense, useEffect, useRef } from "react"
 import { usePathname, useSearchParams } from "next/navigation"
 import posthog from "posthog-js"
 import { env } from "@/env"
@@ -10,11 +10,32 @@ interface PostHogProviderProps {
   children: React.ReactNode
 }
 
-export function PostHogProvider({ children }: PostHogProviderProps) {
+function PostHogPageView() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const { user, isAuthenticated } = useAuthContext()
   const lastTrackedUrl = useRef<string>("")
+
+  // Track pageviews with deduplication
+  useEffect(() => {
+    if (pathname && posthog.__loaded) {
+      let url = window.origin + pathname
+      if (searchParams.toString()) {
+        url = url + `?${searchParams.toString()}`
+      }
+
+      // Only track if URL actually changed (prevents duplicate pageviews)
+      if (url !== lastTrackedUrl.current) {
+        lastTrackedUrl.current = url
+        posthog.capture("$pageview", { $current_url: url })
+      }
+    }
+  }, [pathname, searchParams])
+
+  return null
+}
+
+export function PostHogProvider({ children }: PostHogProviderProps) {
+  const { user, isAuthenticated } = useAuthContext()
 
   // Initialize PostHog
   useEffect(() => {
@@ -35,22 +56,6 @@ export function PostHogProvider({ children }: PostHogProviderProps) {
     }
   }, [])
 
-  // Track pageviews with deduplication
-  useEffect(() => {
-    if (pathname && posthog.__loaded) {
-      let url = window.origin + pathname
-      if (searchParams.toString()) {
-        url = url + `?${searchParams.toString()}`
-      }
-
-      // Only track if URL actually changed (prevents duplicate pageviews)
-      if (url !== lastTrackedUrl.current) {
-        lastTrackedUrl.current = url
-        posthog.capture("$pageview", { $current_url: url })
-      }
-    }
-  }, [pathname, searchParams])
-
   // Identify user
   useEffect(() => {
     if (posthog.__loaded) {
@@ -65,5 +70,12 @@ export function PostHogProvider({ children }: PostHogProviderProps) {
     }
   }, [isAuthenticated, user])
 
-  return <>{children}</>
+  return (
+    <>
+      <Suspense fallback={null}>
+        <PostHogPageView />
+      </Suspense>
+      {children}
+    </>
+  )
 }
