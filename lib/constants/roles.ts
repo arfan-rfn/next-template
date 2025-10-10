@@ -40,6 +40,25 @@ export type Role = typeof ROLES[keyof typeof ROLES]
 export type AdminPanelRole = typeof ROLE_GROUPS.ADMIN_PANEL_ACCESS[number]
 
 /**
+ * Role hierarchy for privilege comparison
+ * Lower number = higher privilege (can do more actions)
+ *
+ * This mirrors the backend ROLE_HIERARCHY configuration exactly.
+ * Used to prevent privilege escalation during impersonation.
+ *
+ * @example
+ * admin (1) > moderator (2) > user (3)
+ * admin can impersonate moderator and user ✅
+ * moderator can impersonate user only ✅
+ * moderator CANNOT impersonate admin or moderator ❌
+ */
+export const ROLE_HIERARCHY = {
+	admin: 1,
+	moderator: 2,
+	user: 3,
+} as const
+
+/**
  * Helper function to check if a user has one of the allowed roles
  *
  * @param userRole - The user's current role (from session)
@@ -55,4 +74,48 @@ export function hasRole(
 	allowedRoles: readonly string[]
 ): boolean {
 	return !!userRole && allowedRoles.includes(userRole)
+}
+
+/**
+ * Check if a user can perform administrative actions on a target user based on role hierarchy
+ *
+ * This is the core security function that prevents privilege escalation across ALL admin actions
+ * including: edit, delete, ban, unban, set role, impersonate, etc.
+ *
+ * Rule: You can only perform admin actions on users with LOWER privileges (higher hierarchy number) than yourself.
+ *
+ * @param currentUserRole - The role of the user attempting the action
+ * @param targetUserRole - The role of the user being acted upon
+ * @returns true if action is allowed based on role hierarchy
+ *
+ * @example
+ * // Admin (1) can act on Moderator (2) - allowed
+ * canPerformActionOnUser('admin', 'moderator') // true
+ *
+ * @example
+ * // Moderator (2) cannot act on Admin (1) - blocked (privilege escalation)
+ * canPerformActionOnUser('moderator', 'admin') // false
+ *
+ * @example
+ * // Moderator (2) cannot act on another Moderator (2) - blocked (same privilege level)
+ * canPerformActionOnUser('moderator', 'moderator') // false
+ */
+export function canPerformActionOnUser(
+	currentUserRole: string | null | undefined,
+	targetUserRole: string | null | undefined
+): boolean {
+	// Reject if either role is missing
+	if (!currentUserRole || !targetUserRole) return false
+
+	const currentLevel = ROLE_HIERARCHY[currentUserRole as keyof typeof ROLE_HIERARCHY]
+	const targetLevel = ROLE_HIERARCHY[targetUserRole as keyof typeof ROLE_HIERARCHY]
+
+	// Reject if either role is not in hierarchy (unknown role)
+	if (currentLevel === undefined || targetLevel === undefined) return false
+
+	// Allow only if current user has higher privilege (lower number) than target
+	// admin (1) < moderator (2) ✅ (admin can act on moderator)
+	// moderator (2) < admin (1) ❌ (moderator cannot act on admin - privilege escalation)
+	// moderator (2) < moderator (2) ❌ (moderator cannot act on same level)
+	return currentLevel < targetLevel
 }

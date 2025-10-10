@@ -497,19 +497,253 @@ export default function UsersPage() {
 }
 ```
 
+## Role Hierarchy Security
+
+To prevent privilege escalation attacks, the system enforces a role hierarchy across **ALL admin actions**. This ensures that users can only perform administrative actions on users with lower privileges than themselves.
+
+### The Problem
+
+Without role hierarchy enforcement, a moderator with admin permissions could:
+1. **Edit** an admin's profile
+2. **Change role** of an admin to a regular user
+3. **Ban** an admin account
+4. **Delete** an admin user
+5. **Impersonate** an admin and gain full admin privileges
+
+This is a **critical security vulnerability** that allows privilege escalation and must be prevented.
+
+### The Solution
+
+The system implements a numeric role hierarchy where lower numbers represent higher privileges:
+
+```typescript
+// lib/constants/roles.ts
+export const ROLE_HIERARCHY = {
+  admin: 1,        // Highest privilege
+  moderator: 2,    // Mid-level privilege
+  user: 3,         // Lowest privilege
+} as const
+```
+
+### Privilege Rules
+
+The `canPerformActionOnUser()` helper function enforces these rules across **ALL admin actions**:
+
+| Admin Role | Can Act On | Cannot Act On |
+|------------|-----------|--------------|
+| **Admin (1)** | Moderator (2), User (3) | Other Admins (1) |
+| **Moderator (2)** | User (3) only | Admin (1), Other Moderators (2) |
+| **User (3)** | No one | Everyone |
+
+**Protected Actions:**
+- Edit user profile
+- Change user role
+- Ban/Unban user
+- Delete user
+- Impersonate user
+
+### Implementation
+
+The role hierarchy check is implemented at the UI level in the user actions menu for ALL admin actions:
+
+```tsx
+// components/admin/user-management/user-actions-menu.tsx
+import { canPerformActionOnUser } from "@/lib/constants/roles"
+import { useSession } from "@/lib/auth"
+
+// Get current user's role from session
+const { data: session } = useSession()
+const currentUserRole = session?.user?.role
+
+// Permission checks
+const { data: canUpdatePerm = false } = usePermission(...PERMISSIONS.USER.UPDATE)
+const { data: canBanPerm = false } = usePermission(...PERMISSIONS.USER.BAN)
+const { data: canImpersonatePerm = false } = usePermission(...PERMISSIONS.USER.IMPERSONATE)
+
+// Role hierarchy check - applies to ALL actions
+const canActOnUser = canPerformActionOnUser(currentUserRole, user.role)
+
+// Combine permission AND hierarchy for each action
+const canUpdate = canUpdatePerm && canActOnUser
+const canBan = canBanPerm && canActOnUser
+const canImpersonate = canImpersonatePerm && canActOnUser
+
+// Actions only show if BOTH permission AND hierarchy checks pass
+{canUpdate && <MenuItem>Edit User</MenuItem>}
+{canBan && <MenuItem>Ban User</MenuItem>}
+{canImpersonate && <MenuItem>Impersonate</MenuItem>}
+```
+
+### Examples
+
+#### ✅ Allowed Scenarios
+
+```typescript
+// Admin can act on moderator (edit, ban, delete, impersonate, etc.)
+canPerformActionOnUser('admin', 'moderator')  // true
+// Admin has privilege level 1, moderator has 2 → 1 < 2 ✅
+
+// Admin can act on regular user
+canPerformActionOnUser('admin', 'user')  // true
+// Admin has privilege level 1, user has 3 → 1 < 3 ✅
+
+// Moderator can act on regular user
+canPerformActionOnUser('moderator', 'user')  // true
+// Moderator has privilege level 2, user has 3 → 2 < 3 ✅
+```
+
+**Real-world examples:**
+- Admin can **ban** a moderator ✅
+- Admin can **delete** a moderator ✅
+- Admin can **edit** a moderator's profile ✅
+- Moderator can **impersonate** a regular user ✅
+
+#### ❌ Blocked Scenarios
+
+```typescript
+// Moderator trying to act on admin (privilege escalation!)
+canPerformActionOnUser('moderator', 'admin')  // false
+// Moderator has privilege level 2, admin has 1 → 2 < 1 ❌
+
+// Moderator trying to act on another moderator
+canPerformActionOnUser('moderator', 'moderator')  // false
+// Same privilege level → 2 < 2 ❌
+
+// User trying to act on anyone
+canPerformActionOnUser('user', 'user')  // false
+// Same privilege level → 3 < 3 ❌
+```
+
+**Real-world examples:**
+- Moderator **cannot ban** an admin ❌ (privilege escalation blocked)
+- Moderator **cannot delete** another moderator ❌ (lateral movement blocked)
+- Moderator **cannot change role** of an admin ❌ (privilege escalation blocked)
+- Moderator **cannot edit** an admin's profile ❌ (information tampering blocked)
+
+### Adding New Roles to Hierarchy
+
+When adding a new role, you must add it to the hierarchy to enable proper privilege checks for ALL admin actions:
+
+```typescript
+// lib/constants/roles.ts
+export const ROLE_HIERARCHY = {
+  admin: 1,
+  moderator: 2,
+  support: 2,      // ← Same level as moderator
+  user: 3,
+} as const
+```
+
+**Rules for assigning hierarchy levels:**
+- **Lower number = higher privilege** (can do more actions)
+- Roles at the **same level cannot impersonate each other**
+- Each role can **only impersonate roles with higher numbers** (lower privileges)
+
+### Backend + Frontend Defense
+
+The role hierarchy is enforced on **both** the backend and frontend:
+
+**Backend (Primary Security):**
+```typescript
+// Your API server's Better Auth config
+export const ROLE_HIERARCHY = {
+  admin: 1,
+  moderator: 2,
+  user: 3,
+}
+// Backend validates and throws error if hierarchy violation detected
+```
+
+**Frontend (UX Enhancement):**
+```typescript
+// lib/constants/roles.ts - mirrors backend exactly
+export const ROLE_HIERARCHY = {
+  admin: 1,
+  moderator: 2,
+  user: 3,
+}
+// Frontend hides impersonate button to prevent confusion and wasted API calls
+```
+
+This **defense-in-depth** approach ensures:
+- Backend enforces security (prevents attacks)
+- Frontend provides better UX (prevents confusion)
+- Moderators don't see impersonate button for admins/moderators
+- Clicking the button (if exposed) still fails on backend
+
+### The canPerformActionOnUser() Function
+
+This is the core security function that protects ALL admin actions from privilege escalation:
+
+```typescript
+export function canPerformActionOnUser(
+  currentUserRole: string | null | undefined,
+  targetUserRole: string | null | undefined
+): boolean {
+  // 1. Reject if either role is missing
+  if (!currentUserRole || !targetUserRole) return false
+
+  // 2. Get hierarchy levels
+  const currentLevel = ROLE_HIERARCHY[currentUserRole as keyof typeof ROLE_HIERARCHY]
+  const targetLevel = ROLE_HIERARCHY[targetUserRole as keyof typeof ROLE_HIERARCHY]
+
+  // 3. Reject if either role is not in hierarchy (unknown role)
+  if (currentLevel === undefined || targetLevel === undefined) return false
+
+  // 4. Allow only if current user has higher privilege (lower number) than target
+  // admin (1) < moderator (2) ✅ (admin can act on moderator)
+  // moderator (2) < admin (1) ❌ (moderator cannot act on admin)
+  // moderator (2) < moderator (2) ❌ (moderator cannot act on same level)
+  return currentLevel < targetLevel
+}
+```
+
+### Impersonation Banner
+
+When an admin successfully impersonates a user, a warning banner appears at the top of all pages:
+
+```tsx
+import { ImpersonationBanner } from "@/components/admin/impersonation-banner"
+
+// Shows automatically when impersonating
+<ImpersonationBanner />
+```
+
+The banner:
+- Uses destructive theme colors for high visibility
+- Shows the impersonated user's name/email
+- Provides "Stop Impersonating" button to exit
+- Fixed position at top of page with proper spacing
+
+To detect impersonation status:
+
+```tsx
+import { useIsImpersonating } from "@/hooks/use-admin"
+
+const { isImpersonating, impersonatedBy } = useIsImpersonating()
+
+if (isImpersonating) {
+  console.log('Being impersonated by admin:', impersonatedBy)
+}
+```
+
+**Important:** Better Auth stores impersonation data at `session.session.impersonatedBy`, not `session.impersonatedBy`.
+
 ## Security Considerations
 
 ### Important Security Notes
 
-1. **Client-side checks are for UI only** - Never rely on `useCanAccessAdmin()` or `useIsAdmin()` for security. All admin operations are validated on the server.
+1. **Client-side checks are for UI only** - Never rely on `useCanAccessAdmin()`, `useIsAdmin()`, or `canPerformActionOnUser()` for security. All admin operations are validated on the server.
 
-2. **Server-side validation** - Your API server already validates all admin operations through Better Auth's admin plugin.
+2. **Server-side validation** - Your API server already validates all admin operations through Better Auth's admin plugin, including role hierarchy enforcement.
 
 3. **Sensitive operations require confirmation** - Dialogs are shown before destructive actions like banning or deleting users.
 
-4. **Impersonation tracking** - When impersonating, the session stores the original admin's ID in `impersonatedBy` field.
+4. **Impersonation tracking** - When impersonating, the session stores the original admin's ID in `impersonatedBy` field for audit purposes.
 
 5. **Session security** - Revoke sessions immediately if you suspect unauthorized access.
+
+6. **Role hierarchy must match backend** - The frontend ROLE_HIERARCHY constant must exactly mirror the backend configuration to maintain security consistency.
 
 ### Best Practices
 
@@ -674,3 +908,13 @@ For issues or questions:
 - Updated all components to use semantic hooks for role checking
 - Made system future-proof: add new roles by updating single array in `ROLE_GROUPS`
 - Added comprehensive role management documentation with best practices
+
+### Role Hierarchy Security (Privilege Escalation Prevention)
+- Added ROLE_HIERARCHY constant to `lib/constants/roles.ts` mirroring backend
+- Implemented `canPerformActionOnUser()` helper function for privilege checking across ALL admin actions
+- Generalized security to protect: edit, delete, ban, unban, set role, and impersonate
+- Updated user actions menu with role hierarchy validation for every action
+- Prevents moderators from acting on admins or other moderators (privilege escalation + lateral movement)
+- Defense-in-depth: backend enforcement + frontend UX improvement
+- Fixed impersonation banner detection (`session.session.impersonatedBy`)
+- Added comprehensive role hierarchy security documentation with real-world examples

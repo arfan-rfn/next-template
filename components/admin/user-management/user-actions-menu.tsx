@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { MoreHorizontal, Edit, Shield, Ban, Trash2, Eye, KeyRound, UserCheck } from "lucide-react"
+import { MoreHorizontal, Edit, Shield, Ban, Trash2, Eye, UserCheck } from "lucide-react"
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -17,6 +17,8 @@ import { BanUserDialog } from "./ban-user-dialog"
 import { useRemoveUser, useUnbanUser, useImpersonateUser } from "@/hooks/use-admin"
 import { usePermission } from "@/hooks/use-permission"
 import { PERMISSIONS } from "@/lib/constants/permissions"
+import { canPerformActionOnUser } from "@/lib/constants/roles"
+import { useSession } from "@/lib/auth"
 import type { User } from "@/lib/types/auth"
 import {
 	AlertDialog,
@@ -42,12 +44,26 @@ export function UserActionsMenu({ user }: UserActionsMenuProps) {
 	const [banOpen, setBanOpen] = useState(false)
 	const [deleteOpen, setDeleteOpen] = useState(false)
 
-	// Permission checks
-	const { data: canUpdate = false } = usePermission(...PERMISSIONS.USER.UPDATE)
-	const { data: canSetRole = false } = usePermission(...PERMISSIONS.USER.SET_ROLE)
-	const { data: canBan = false } = usePermission(...PERMISSIONS.USER.BAN)
-	const { data: canDelete = false } = usePermission(...PERMISSIONS.USER.DELETE)
-	const { data: canImpersonate = false } = usePermission(...PERMISSIONS.USER.IMPERSONATE)
+	// Get current user's session to check their role
+	const { data: session } = useSession()
+	const currentUserRole = session?.user?.role
+
+	// Permission checks - these check if the user has the permission
+	const { data: canUpdatePerm = false } = usePermission(...PERMISSIONS.USER.UPDATE)
+	const { data: canSetRolePerm = false } = usePermission(...PERMISSIONS.USER.SET_ROLE)
+	const { data: canBanPerm = false } = usePermission(...PERMISSIONS.USER.BAN)
+	const { data: canDeletePerm = false } = usePermission(...PERMISSIONS.USER.DELETE)
+	const { data: canImpersonatePerm = false } = usePermission(...PERMISSIONS.USER.IMPERSONATE)
+
+	// Role hierarchy checks - combine permission AND hierarchy for ALL actions
+	// This prevents privilege escalation (moderator acting on admin/other moderators)
+	const canActOnUser = canPerformActionOnUser(currentUserRole, user.role)
+
+	const canUpdate = canUpdatePerm && canActOnUser
+	const canSetRole = canSetRolePerm && canActOnUser
+	const canBan = canBanPerm && canActOnUser
+	const canDelete = canDeletePerm && canActOnUser
+	const canImpersonate = canImpersonatePerm && canActOnUser
 
 	const { mutate: removeUser, isPending: isDeleting } = useRemoveUser()
 	const { mutate: unbanUser, isPending: isUnbanning } = useUnbanUser()
@@ -80,7 +96,7 @@ export function UserActionsMenu({ user }: UserActionsMenuProps) {
 					<DropdownMenuLabel>Actions</DropdownMenuLabel>
 					<DropdownMenuSeparator />
 
-					{/* Edit - requires update permission */}
+					{/* Edit - requires permission + role hierarchy check */}
 					{canUpdate && (
 						<DropdownMenuItem onClick={() => setEditOpen(true)}>
 							<Edit className="mr-2 h-4 w-4" />
@@ -88,7 +104,7 @@ export function UserActionsMenu({ user }: UserActionsMenuProps) {
 						</DropdownMenuItem>
 					)}
 
-					{/* Change Role - requires set-role permission */}
+					{/* Change Role - requires permission + role hierarchy check */}
 					{canSetRole && (
 						<DropdownMenuItem onClick={() => setRoleOpen(true)}>
 							<Shield className="mr-2 h-4 w-4" />
@@ -98,7 +114,7 @@ export function UserActionsMenu({ user }: UserActionsMenuProps) {
 
 					{(canUpdate || canSetRole) && <DropdownMenuSeparator />}
 
-					{/* Ban/Unban - requires ban permission */}
+					{/* Ban/Unban - requires permission + role hierarchy check */}
 					{canBan && (
 						user.banned ? (
 							<DropdownMenuItem onClick={handleUnban} disabled={isUnbanning}>
@@ -113,7 +129,7 @@ export function UserActionsMenu({ user }: UserActionsMenuProps) {
 						)
 					)}
 
-					{/* Impersonate - requires impersonate permission */}
+					{/* Impersonate - requires permission + role hierarchy check */}
 					{canImpersonate && (
 						<DropdownMenuItem onClick={handleImpersonate} disabled={isImpersonating}>
 							<Eye className="mr-2 h-4 w-4" />
@@ -123,7 +139,7 @@ export function UserActionsMenu({ user }: UserActionsMenuProps) {
 
 					{(canBan || canImpersonate) && canDelete && <DropdownMenuSeparator />}
 
-					{/* Delete - requires delete permission */}
+					{/* Delete - requires permission + role hierarchy check */}
 					{canDelete && (
 						<DropdownMenuItem
 							onClick={() => setDeleteOpen(true)}
