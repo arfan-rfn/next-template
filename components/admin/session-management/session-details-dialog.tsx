@@ -122,7 +122,7 @@ interface SessionDetailsDialogProps {
 export function SessionDetailsDialog({ session, open, onOpenChange }: SessionDetailsDialogProps) {
 	if (!session) return null
 
-	const { browser, os, full } = parseUserAgent(session.userAgent)
+	const { browser, os, full } = parseUserAgent(session.userAgent ?? undefined)
 	const isExpired = new Date(session.expiresAt) < new Date()
 
 	return (
@@ -188,7 +188,7 @@ export function SessionDetailsDialog({ session, open, onOpenChange }: SessionDet
 						icon={MapPin}
 						label="IP Address"
 						value={session.ipAddress || "Unknown"}
-						copyable={session.ipAddress}
+						copyable={session.ipAddress ?? undefined}
 					/>
 
 					<DetailRow

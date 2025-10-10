@@ -83,7 +83,7 @@ export const columns: ColumnDef<Session>[] = [
 		},
 		cell: ({ row }) => {
 			const session = row.original
-			const { browser, os } = parseUserAgent(session.userAgent)
+			const { browser, os } = parseUserAgent(session.userAgent ?? undefined)
 
 			return (
 				<div className="flex flex-col min-w-0 py-2">
