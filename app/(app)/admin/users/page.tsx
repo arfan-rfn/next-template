@@ -5,7 +5,7 @@ import { UserList } from "@/components/admin/user-management/user-list"
 import { CreateUserDialog } from "@/components/admin/user-management/create-user-dialog"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { PlusCircle, Users } from "lucide-react"
+import { PlusCircle } from "lucide-react"
 import { usePermission } from "@/hooks/use-permission"
 import { PERMISSIONS } from "@/lib/constants/permissions"
 
@@ -35,7 +35,7 @@ export default function AdminUsersPage() {
 				)}
 			</div>
 
-			{/* User List Card */}
+			{/* User List */}
 			<Card className="border-border/40 overflow-hidden">
 				<UserList />
 			</Card>

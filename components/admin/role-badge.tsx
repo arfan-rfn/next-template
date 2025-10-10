@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge"
+import { Shield, ShieldAlert, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface RoleBadgeProps {
@@ -7,28 +8,52 @@ interface RoleBadgeProps {
 }
 
 /**
- * Display user role as a styled badge
+ * Display user role as a styled badge with icon
  */
 export function RoleBadge({ role, className }: RoleBadgeProps) {
-	const getRoleColor = (role: string) => {
+	const getRoleConfig = (role: string) => {
 		switch (role.toLowerCase()) {
 			case 'admin':
-				return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+				return {
+					icon: Shield,
+					color: 'bg-primary/10 text-primary border-primary/20',
+					label: 'Admin'
+				}
 			case 'moderator':
-				return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
+				return {
+					icon: ShieldAlert,
+					color: 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/30 dark:text-orange-400 dark:border-orange-900',
+					label: 'Moderator'
+				}
 			case 'user':
-				return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+				return {
+					icon: User,
+					color: 'bg-muted text-muted-foreground border-border',
+					label: 'User'
+				}
 			default:
-				return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
+				return {
+					icon: User,
+					color: 'bg-muted text-muted-foreground border-border',
+					label: role
+				}
 		}
 	}
 
+	const config = getRoleConfig(role)
+	const Icon = config.icon
+
 	return (
 		<Badge
-			variant="secondary"
-			className={cn(getRoleColor(role), className)}
+			variant="outline"
+			className={cn(
+				"gap-1 font-medium",
+				config.color,
+				className
+			)}
 		>
-			{role}
+			<Icon className="h-3 w-3" />
+			{config.label}
 		</Badge>
 	)
 }

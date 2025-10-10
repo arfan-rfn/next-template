@@ -976,7 +976,16 @@ For issues or questions:
 - **Enhanced Dashboard**: Color-coded stat cards with hover effects, animations, and loading states
 - **Improved Layout**: Gradient backgrounds, better spacing, and visual hierarchy throughout
 - **Clean & Minimalist**: Removed redundant descriptions and icons for a cleaner, more focused design
+- **Data Table Implementation**: Implemented shadcn data table with TanStack Table for powerful sorting/filtering
+- **Sortable Columns**: Click column headers to sort by User, Role, or Created date (ascending/descending)
+- **Client-Side Filtering**: Instant search by name or email with real-time results
+- **Column Visibility**: Toggle columns on/off via View dropdown menu
+- **User Avatars**: Profile pictures or initials in colored circles for each user
+- **Verified Checkmark**: Email verification shown as green checkmark icon inline (no confusing badge)
+- **Badges with Icons**: Role badges (Shield/ShieldAlert/User), status badges (CircleCheck/Ban)
+- **Theme Colors**: Admin uses primary color, moderator uses orange, user uses muted - consistent with theme
+- **Improved Actions Button**: Changed from ghost to outline variant with visible border for better affordability
+- **Pagination**: Built-in pagination with Previous/Next controls and page counter
 - **Accessibility**: Proper focus states, keyboard navigation, and ARIA attributes
-- **Responsive Design**: Mobile-first approach with flexible layouts
-- **Visual Polish**: Smooth transitions, hover effects, and staggered animations
+- **Visual Polish**: Smooth transitions, hover effects on rows, and professional table styling
 - See `plan/admin-ui-redesign.md` for detailed implementation notes

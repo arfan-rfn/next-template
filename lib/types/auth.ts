@@ -16,6 +16,10 @@ export interface User {
 	banned?: boolean | null
 	banReason?: string | null
 	banExpires?: Date | null
+	// Profile fields
+	profileCompleted?: boolean
+	profileCompletedAt?: Date | null
+	firstLoginAt?: Date | null
 }
 
 // Session type with admin fields

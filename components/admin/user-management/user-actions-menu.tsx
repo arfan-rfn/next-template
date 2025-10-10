@@ -87,12 +87,17 @@ export function UserActionsMenu({ user }: UserActionsMenuProps) {
 		<>
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
-					<Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+					<Button
+						variant="outline"
+						size="sm"
+						className="h-8 w-8 p-0 border-border/40 hover:bg-muted hover:border-border"
+						onClick={(e) => e.stopPropagation()}
+					>
 						<span className="sr-only">Open menu</span>
 						<MoreHorizontal className="h-4 w-4" />
 					</Button>
 				</DropdownMenuTrigger>
-				<DropdownMenuContent align="end">
+				<DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
 					<DropdownMenuLabel>Actions</DropdownMenuLabel>
 					<DropdownMenuSeparator />
 
