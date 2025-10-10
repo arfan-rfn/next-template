@@ -46,7 +46,7 @@ export interface CreateUserInput {
 	name: string
 	email: string
 	password: string
-	role?: "user" | "admin"
+	role?: "user" | "admin"  // Better Auth API only supports user and admin for creation
 }
 
 export interface UpdateUserInput {
