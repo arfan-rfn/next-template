@@ -107,12 +107,27 @@ export function useIsAdmin() {
 
 /**
  * Hook to list users with optional filtering
+ *
+ * Supports both simple search (via 'search' parameter) and advanced Better Auth search parameters.
+ * Simple search automatically detects whether to search by email or name.
  */
 export function useListUsers(query?: ListUsersQuery) {
 	return useQuery({
-		queryKey: ['admin', 'users', query],
+		queryKey: ['admin', 'users', 'moderator', query],
 		queryFn: async () => {
-			const result = await authClient.admin.listUsers({ query: query || {} })
+			// Transform the query to match Better Auth API expectations
+			const transformedQuery: Record<string, any> = { ...query }
+
+			// Convert simple search to Better Auth format
+			if (query?.search && !query?.searchValue) {
+				transformedQuery.searchValue = query.search
+				// Smart detection: if search contains @, search by email, otherwise by name
+				transformedQuery.searchField = query.search.includes('@') ? 'email' : 'name'
+				transformedQuery.searchOperator = 'contains'
+				delete transformedQuery.search
+			}
+
+			const result = await authClient.admin.listUsers({ query: transformedQuery })
 			if (!result.data) {
 				throw new Error(result.error?.message || 'Failed to fetch users')
 			}

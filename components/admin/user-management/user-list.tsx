@@ -11,22 +11,38 @@ import {
 	TableRow,
 } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import { RoleBadge } from "@/components/admin/role-badge"
 import { UserActionsMenu } from "./user-actions-menu"
 import { Badge } from "@/components/ui/badge"
-import { Search } from "lucide-react"
+import { Search, ChevronLeft, ChevronRight } from "lucide-react"
+
+const USERS_PER_PAGE = 20
 
 /**
- * Table displaying all users with search and filtering
+ * Table displaying all users with search, filtering, and pagination
  */
 export function UserList() {
 	const [search, setSearch] = useState("")
+	const [page, setPage] = useState(1)
+
 	const { data, isLoading, error } = useListUsers({
-		search,
-		limit: 100,
+		search: search.toLowerCase(), // Convert to lowercase for better matching
+		limit: USERS_PER_PAGE,
+		offset: (page - 1) * USERS_PER_PAGE,
 		sortBy: "createdAt",
 		sortDirection: "desc"
 	})
+
+	// Reset to page 1 when search changes
+	const handleSearchChange = (value: string) => {
+		setSearch(value)
+		setPage(1)
+	}
+
+	const totalPages = data?.total ? Math.ceil(data.total / USERS_PER_PAGE) : 1
+	const hasNextPage = page < totalPages
+	const hasPreviousPage = page > 1
 
 	if (error) {
 		return (
@@ -43,9 +59,9 @@ export function UserList() {
 				<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 				<Input
 					type="text"
-					placeholder="Search by name or email..."
+					placeholder="Search by name or email (case-sensitive)..."
 					value={search}
-					onChange={(e) => setSearch(e.target.value)}
+					onChange={(e) => handleSearchChange(e.target.value)}
 					className="pl-10"
 				/>
 			</div>
@@ -112,11 +128,39 @@ export function UserList() {
 				</Table>
 			</div>
 
-			{/* Results count */}
-			{data?.users && (
-				<p className="text-sm text-muted-foreground">
-					Showing {data.users.length} {data.users.length === 1 ? 'user' : 'users'}
-				</p>
+			{/* Pagination and results */}
+			{data && (
+				<div className="flex items-center justify-between">
+					<p className="text-sm text-muted-foreground">
+						Showing {data.users.length === 0 ? 0 : (page - 1) * USERS_PER_PAGE + 1} to {(page - 1) * USERS_PER_PAGE + data.users.length} of {data.total} {data.total === 1 ? 'user' : 'users'}
+					</p>
+
+					<div className="flex items-center gap-2">
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => setPage(p => p - 1)}
+							disabled={!hasPreviousPage || isLoading}
+						>
+							<ChevronLeft className="h-4 w-4 mr-1" />
+							Previous
+						</Button>
+
+						<span className="text-sm text-muted-foreground">
+							Page {page} of {totalPages}
+						</span>
+
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => setPage(p => p + 1)}
+							disabled={!hasNextPage || isLoading}
+						>
+							Next
+							<ChevronRight className="h-4 w-4 ml-1" />
+						</Button>
+					</div>
+				</div>
 			)}
 		</div>
 	)

@@ -95,7 +95,16 @@ export interface ListUsersQuery {
 	offset?: number
 	sortBy?: 'createdAt' | 'updatedAt' | 'email' | 'name'
 	sortDirection?: 'asc' | 'desc'
+	// Simple search (will be converted to searchValue/searchField/searchOperator)
 	search?: string
+	// Better Auth search parameters (for advanced usage)
+	searchValue?: string
+	searchField?: 'email' | 'name'
+	searchOperator?: 'contains' | 'starts_with' | 'ends_with'
+	// Filter parameters
+	filterField?: string
+	filterValue?: string
+	filterOperator?: 'eq' | 'ne' | 'lt' | 'lte' | 'gt' | 'gte'
 	role?: string
 	banned?: boolean
 }

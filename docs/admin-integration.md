@@ -65,15 +65,47 @@ admin({
 
 #### List Users
 ```typescript
+// Simple search - automatically detects email vs name
 const { data, isLoading } = useListUsers({
-  search: "john",
+  search: "john",          // Searches by name
   limit: 100,
   sortBy: "createdAt",
   sortDirection: "desc",
   role: "admin",
   banned: false
 })
+
+// Search by email (auto-detected when search contains @)
+const { data } = useListUsers({
+  search: "user@example.com"  // Automatically searches by email field
+})
+
+// Advanced search with explicit Better Auth parameters
+const { data } = useListUsers({
+  searchValue: "john",
+  searchField: "name",                        // 'email' or 'name'
+  searchOperator: "contains",                 // 'contains', 'starts_with', 'ends_with'
+  filterField: "role",
+  filterValue: "admin",
+  filterOperator: "eq"                        // 'eq', 'ne', 'lt', 'lte', 'gt', 'gte'
+})
 ```
+
+**Search Features:**
+- **Smart detection**: If search contains `@`, searches by email, otherwise by name
+- **Contains matching**: Searches use `contains` operator by default
+- **Advanced control**: Use `searchField` and `searchOperator` for fine-grained control
+- **Pagination**: Uses `offset` and `limit` for efficient data loading (20 users per page)
+- All search parameters follow Better Auth API specification
+
+**Case Sensitivity Note:**
+The frontend converts search queries to lowercase, but true case-insensitive search requires backend support. For MongoDB-based Better Auth backends, implement one of these solutions:
+
+1. **Collation** (recommended): Configure case-insensitive collation on your user collection
+2. **Case-insensitive regex**: Use `$regex` with `$options: 'i'` in Better Auth queries
+3. **Lowercase fields**: Store lowercase versions of searchable fields (e.g., `nameLower`, `emailLower`)
+
+See `plan/admin-user-search-improvements.md` for detailed backend implementation instructions.
 
 #### Create User
 ```typescript
@@ -850,7 +882,6 @@ interface Session {
 
 Potential features to add:
 - Bulk user operations (ban multiple users at once)
-- Advanced user search and filtering
 - Export user data as CSV/JSON
 - User activity logs and analytics
 - Email notifications for admin actions
@@ -925,3 +956,15 @@ For issues or questions:
 - Defense-in-depth: backend enforcement + frontend UX improvement
 - Fixed impersonation banner detection (`session.session.impersonatedBy`)
 - Added comprehensive role hierarchy security documentation with real-world examples
+
+### User Search & Pagination Improvements
+- **Fixed user search**: Properly works with Better Auth API now
+- **Added pagination**: 20 users per page with Previous/Next controls
+- **Smart search detection**: Automatically searches by email if input contains `@`, otherwise by name
+- **Case-insensitive search**: Frontend converts to lowercase (requires backend support for full functionality)
+- Updated `ListUsersQuery` interface to include all Better Auth search parameters
+- Implemented query transformation in `useListUsers` hook to convert simple search to Better Auth format
+- Added support for advanced search with explicit `searchField` and `searchOperator` parameters
+- Pagination automatically resets to page 1 when search query changes
+- Results counter shows "X to Y of Z users"
+- Updated documentation with search examples, pagination info, and backend recommendations for case-insensitive search
