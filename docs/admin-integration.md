@@ -680,12 +680,13 @@ export function canPerformActionOnUser(
   currentUserRole: string | null | undefined,
   targetUserRole: string | null | undefined
 ): boolean {
-  // 1. Reject if either role is missing
-  if (!currentUserRole || !targetUserRole) return false
+  // 1. Default to 'user' role if null/undefined (safest default - lowest privilege)
+  const current = currentUserRole || ROLES.USER
+  const target = targetUserRole || ROLES.USER
 
   // 2. Get hierarchy levels
-  const currentLevel = ROLE_HIERARCHY[currentUserRole as keyof typeof ROLE_HIERARCHY]
-  const targetLevel = ROLE_HIERARCHY[targetUserRole as keyof typeof ROLE_HIERARCHY]
+  const currentLevel = ROLE_HIERARCHY[current as keyof typeof ROLE_HIERARCHY]
+  const targetLevel = ROLE_HIERARCHY[target as keyof typeof ROLE_HIERARCHY]
 
   // 3. Reject if either role is not in hierarchy (unknown role)
   if (currentLevel === undefined || targetLevel === undefined) return false
@@ -694,9 +695,15 @@ export function canPerformActionOnUser(
   // admin (1) < moderator (2) ✅ (admin can act on moderator)
   // moderator (2) < admin (1) ❌ (moderator cannot act on admin)
   // moderator (2) < moderator (2) ❌ (moderator cannot act on same level)
+  // null → user (3) < user (3) ❌ (users cannot act on each other)
   return currentLevel < targetLevel
 }
 ```
+
+**Safe Default Behavior:**
+- If a user has no role set (`null` or `undefined`), they are treated as a regular **'user'** (lowest privilege)
+- This ensures security even for users without explicit role assignments
+- Prevents privilege escalation if role data is missing or corrupted
 
 ### Impersonation Banner
 

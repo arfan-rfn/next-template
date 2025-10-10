@@ -84,8 +84,8 @@ export function hasRole(
  *
  * Rule: You can only perform admin actions on users with LOWER privileges (higher hierarchy number) than yourself.
  *
- * @param currentUserRole - The role of the user attempting the action
- * @param targetUserRole - The role of the user being acted upon
+ * @param currentUserRole - The role of the user attempting the action (defaults to 'user' if null/undefined)
+ * @param targetUserRole - The role of the user being acted upon (defaults to 'user' if null/undefined)
  * @returns true if action is allowed based on role hierarchy
  *
  * @example
@@ -99,16 +99,21 @@ export function hasRole(
  * @example
  * // Moderator (2) cannot act on another Moderator (2) - blocked (same privilege level)
  * canPerformActionOnUser('moderator', 'moderator') // false
+ *
+ * @example
+ * // Null roles default to 'user' - users cannot act on each other
+ * canPerformActionOnUser(null, null) // false (both treated as user role)
  */
 export function canPerformActionOnUser(
 	currentUserRole: string | null | undefined,
 	targetUserRole: string | null | undefined
 ): boolean {
-	// Reject if either role is missing
-	if (!currentUserRole || !targetUserRole) return false
+	// Default to 'user' role if null/undefined (safest default - lowest privilege)
+	const current = currentUserRole || ROLES.USER
+	const target = targetUserRole || ROLES.USER
 
-	const currentLevel = ROLE_HIERARCHY[currentUserRole as keyof typeof ROLE_HIERARCHY]
-	const targetLevel = ROLE_HIERARCHY[targetUserRole as keyof typeof ROLE_HIERARCHY]
+	const currentLevel = ROLE_HIERARCHY[current as keyof typeof ROLE_HIERARCHY]
+	const targetLevel = ROLE_HIERARCHY[target as keyof typeof ROLE_HIERARCHY]
 
 	// Reject if either role is not in hierarchy (unknown role)
 	if (currentLevel === undefined || targetLevel === undefined) return false
@@ -117,5 +122,6 @@ export function canPerformActionOnUser(
 	// admin (1) < moderator (2) ✅ (admin can act on moderator)
 	// moderator (2) < admin (1) ❌ (moderator cannot act on admin - privilege escalation)
 	// moderator (2) < moderator (2) ❌ (moderator cannot act on same level)
+	// null → user (3) < user (3) ❌ (users cannot act on each other)
 	return currentLevel < targetLevel
 }
