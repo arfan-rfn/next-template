@@ -1,12 +1,13 @@
 import { createAuthClient } from "better-auth/react"
-import { magicLinkClient } from "better-auth/client/plugins"
+import { magicLinkClient, adminClient } from "better-auth/client/plugins"
 import { env } from "@/env"
 import { toAbsoluteUrl } from "@/lib/utils"
 
 export const authClient = createAuthClient({
 	baseURL: `${env.NEXT_PUBLIC_API_URL}/auth`,
 	plugins: [
-		magicLinkClient()
+		magicLinkClient(),
+		adminClient()
 	],
 	fetchOptions: {
 		credentials: 'include',

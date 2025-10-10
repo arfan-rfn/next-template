@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useAuthContext } from "@/components/providers/auth-provider"
 import { useUser } from "@/hooks/use-user"
+import { useCanAccessAdmin } from "@/hooks/use-admin"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import {
@@ -23,6 +24,7 @@ import { Icons } from "./icons"
 export function AccountButton() {
 	const { isAuthenticated, isLoading: authLoading, signOut, refresh } = useAuthContext()
 	const { data: user, isLoading: userLoading } = useUser()
+	const { canAccess: canAccessAdmin } = useCanAccessAdmin()
 	const router = useRouter()
 
 	// Combined loading state
@@ -111,6 +113,18 @@ export function AccountButton() {
 					<Icons.Settings className="size-4" />
 					<span>Settings</span>
 				</DropdownMenuItem>
+				{canAccessAdmin && (
+					<>
+						<DropdownMenuSeparator />
+						<DropdownMenuItem
+							onClick={() => router.push("/admin")}
+							className="cursor-pointer space-x-2"
+						>
+							<Icons.Shield className="size-4" />
+							<span>Admin Panel</span>
+						</DropdownMenuItem>
+					</>
+				)}
 				<DropdownMenuSeparator />
 				<DropdownMenuItem
 					onClick={handleSignOut}
