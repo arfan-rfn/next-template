@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 import { usePreloadPermissions } from "@/hooks/use-permission"
 import { COMMON_ADMIN_PERMISSIONS } from "@/lib/constants/permissions"
 import { LayoutDashboard, Users, Activity } from "lucide-react"
+import { Icons } from "@/components/icons"
 
 interface AdminLayoutProps {
 	children: React.ReactNode
@@ -22,7 +23,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 				<div className="container py-8 space-y-8">
 					{/* Navigation */}
 					<div className="space-y-3">
-						<span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+						<span className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+							<Icons.Shield className="size-4" />
 							Admin Panel
 						</span>
 						<nav className="flex items-center gap-2 p-1 bg-muted/50 rounded-lg w-fit backdrop-blur-sm border border-border/40">

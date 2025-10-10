@@ -27,11 +27,12 @@ export interface Session {
 	id: string
 	userId: string
 	expiresAt: Date
+	createdAt: Date
 	token: string
-	ipAddress?: string
-	userAgent?: string
-	// Admin plugin field
-	impersonatedBy: string | null
+	ipAddress?: string | null
+	userAgent?: string | null
+	// Admin plugin field - Better Auth returns undefined, not null
+	impersonatedBy?: string | null
 }
 
 // Full session data with user
