@@ -2,9 +2,11 @@
 
 import { AdminGuard } from "@/components/admin/admin-guard"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { usePreloadPermissions } from "@/hooks/use-permission"
 import { COMMON_ADMIN_PERMISSIONS } from "@/lib/constants/permissions"
+import { LayoutDashboard, Users, Activity } from "lucide-react"
 
 interface AdminLayoutProps {
 	children: React.ReactNode
@@ -16,39 +18,64 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
 	return (
 		<AdminGuard>
-			<div className="container py-8">
-				<div className="mb-8">
-					<h1 className="text-3xl font-bold tracking-tight">Admin Panel</h1>
-					<p className="text-muted-foreground">
-						Manage users, roles, and system settings
-					</p>
+			<div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
+				<div className="container py-8 space-y-8">
+					{/* Navigation */}
+					<div className="space-y-3">
+						<span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+							Admin Panel
+						</span>
+						<nav className="flex items-center gap-2 p-1 bg-muted/50 rounded-lg w-fit backdrop-blur-sm border border-border/40">
+							<AdminNavLink href="/admin" icon={LayoutDashboard}>
+								Dashboard
+							</AdminNavLink>
+							<AdminNavLink href="/admin/users" icon={Users}>
+								Users
+							</AdminNavLink>
+							<AdminNavLink href="/admin/sessions" icon={Activity}>
+								Sessions
+							</AdminNavLink>
+						</nav>
+					</div>
+
+					{/* Page content */}
+					<div className="animate-in fade-in-50 duration-300">
+						{children}
+					</div>
 				</div>
-
-				{/* Admin navigation tabs */}
-				<nav className="mb-8 flex gap-4 border-b pb-2">
-					<AdminNavLink href="/admin">Dashboard</AdminNavLink>
-					<AdminNavLink href="/admin/users">Users</AdminNavLink>
-					<AdminNavLink href="/admin/sessions">Sessions</AdminNavLink>
-				</nav>
-
-				{/* Page content */}
-				{children}
 			</div>
 		</AdminGuard>
 	)
 }
 
-function AdminNavLink({ href, children }: { href: string; children: React.ReactNode }) {
-	// In a real app, use usePathname() from next/navigation to determine active state
-	// For now, this is a simple implementation
+function AdminNavLink({
+	href,
+	children,
+	icon: Icon
+}: {
+	href: string
+	children: React.ReactNode
+	icon: React.ElementType
+}) {
+	const pathname = usePathname()
+	const isActive = pathname === href
+
 	return (
 		<Link
 			href={href}
 			className={cn(
-				"text-sm font-medium transition-colors hover:text-primary",
-				"text-muted-foreground"
+				"flex items-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium transition-all duration-200",
+				"hover:bg-background/80 hover:shadow-sm",
+				"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+				isActive
+					? "bg-background text-foreground shadow-sm border border-border/50"
+					: "text-muted-foreground hover:text-foreground"
 			)}
 		>
+			<Icon className={cn(
+				"h-4 w-4 transition-colors",
+				isActive ? "text-primary" : "text-muted-foreground"
+			)} />
 			{children}
 		</Link>
 	)

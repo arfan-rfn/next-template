@@ -4,7 +4,8 @@ import { useState } from "react"
 import { UserList } from "@/components/admin/user-management/user-list"
 import { CreateUserDialog } from "@/components/admin/user-management/create-user-dialog"
 import { Button } from "@/components/ui/button"
-import { PlusCircle } from "lucide-react"
+import { Card } from "@/components/ui/card"
+import { PlusCircle, Users } from "lucide-react"
 import { usePermission } from "@/hooks/use-permission"
 import { PERMISSIONS } from "@/lib/constants/permissions"
 
@@ -16,23 +17,28 @@ export default function AdminUsersPage() {
 	const { data: canCreate = false } = usePermission(...PERMISSIONS.USER.CREATE)
 
 	return (
-		<div className="space-y-4">
-			<div className="flex items-center justify-between">
-				<div>
-					<h2 className="text-2xl font-bold tracking-tight">User Management</h2>
-					<p className="text-muted-foreground">
-						View and manage all system users
-					</p>
-				</div>
+		<div className="space-y-6">
+			{/* Page Header */}
+			<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+				<h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+					User Management
+				</h1>
 				{canCreate && (
-					<Button onClick={() => setCreateOpen(true)}>
-						<PlusCircle className="mr-2 h-4 w-4" />
+					<Button
+						onClick={() => setCreateOpen(true)}
+						size="lg"
+						className="gap-2 shadow-sm hover:shadow-md transition-shadow"
+					>
+						<PlusCircle className="h-4 w-4" />
 						Create User
 					</Button>
 				)}
 			</div>
 
-			<UserList />
+			{/* User List Card */}
+			<Card className="border-border/40 overflow-hidden">
+				<UserList />
+			</Card>
 
 			<CreateUserDialog open={createOpen} onOpenChange={setCreateOpen} />
 		</div>
