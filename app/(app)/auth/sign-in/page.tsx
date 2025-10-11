@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Icons } from "@/components/icons"
 import { toast } from "sonner"
@@ -11,6 +11,7 @@ import { useAuthConfig } from "@/hooks/use-auth-config"
 
 export default function SignInPage() {
 	const router = useRouter()
+	const searchParams = useSearchParams()
 	const { refresh, isAuthenticated, isLoading: authLoading } = useAuthContext()
 	const authConfig = useAuthConfig()
 	const [isLoading, setIsLoading] = useState(false)
@@ -21,17 +22,20 @@ export default function SignInPage() {
 	const [magicLinkEmail, setMagicLinkEmail] = useState("")
 	const [magicLinkSent, setMagicLinkSent] = useState(false)
 
-	// Redirect authenticated users to dashboard
+	// Get callback URL from query params or use default
+	const callbackUrl = searchParams.get("callbackUrl") || authConfig.redirects.afterSignIn
+
+	// Redirect authenticated users to callback URL or dashboard
 	useEffect(() => {
 		if (!authLoading && isAuthenticated) {
-			router.push(authConfig.redirects.afterSignIn)
+			router.push(callbackUrl)
 		}
-	}, [authLoading, isAuthenticated, router, authConfig.redirects.afterSignIn])
+	}, [authLoading, isAuthenticated, router, callbackUrl])
 
 	const handleGoogleSignIn = async () => {
 		try {
 			setIsLoading(true)
-			await auth.signInWithGoogle(authConfig.redirects.afterSignIn)
+			await auth.signInWithGoogle(callbackUrl)
 			// Refresh auth state after successful Google sign-in
 			setTimeout(() => {
 				refresh()
@@ -47,7 +51,7 @@ export default function SignInPage() {
 	const handleAppleSignIn = async () => {
 		try {
 			setIsLoading(true)
-			await auth.signInWithApple(authConfig.redirects.afterSignIn)
+			await auth.signInWithApple(callbackUrl)
 			// Refresh auth state after successful Apple sign-in
 			setTimeout(() => {
 				refresh()
@@ -76,7 +80,7 @@ export default function SignInPage() {
 			setTimeout(() => {
 				refresh()
 			}, 100)
-			router.push(authConfig.redirects.afterSignIn)
+			router.push(callbackUrl)
 		} catch (error) {
 			console.error("Email sign-in error:", error)
 			toast.error("Invalid email or password")
@@ -102,7 +106,7 @@ export default function SignInPage() {
 
 		try {
 			setIsLoading(true)
-			await auth.signInWithMagicLink(magicLinkEmail)
+			await auth.signInWithMagicLink(magicLinkEmail, callbackUrl)
 			setMagicLinkSent(true)
 			toast.success("Magic link sent! Check your email to sign in.")
 		} catch (error) {

@@ -4,7 +4,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { authClient } from '@/lib/auth'
+import { authClient, auth } from '@/lib/auth'
 import { apiClient, APIError } from '@/lib/api/client'
 import { userKeys } from './use-user'
 import { useAuthContext } from '@/components/providers/auth-provider'
@@ -46,35 +46,21 @@ export interface CompleteProfileResponse {
 // Mutations
 export function useDeleteAccount() {
   const queryClient = useQueryClient()
-  const { getAuthToken } = useAuthContext()
 
   return useMutation({
-    mutationFn: async (data: DeleteAccountRequest) => {
-      const token = getAuthToken()
-      if (!token) {
-        throw new Error('No authentication token found')
-      }
-
-      return apiClient.delete<DeleteAccountResponse>('/user',
-        { confirmation: data.confirmation },
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        }
-      )
+    mutationFn: async () => {
+      // Use Better Auth's deleteUser with email verification
+      return await auth.deleteUser('/auth/account-deleted')
     },
-    onSuccess: (data) => {
-      toast.success(data?.message || 'Account deletion request submitted successfully')
+    onSuccess: () => {
+      toast.success('Account deletion verification email sent. Please check your email to complete the process.')
       // Invalidate user queries
       queryClient.invalidateQueries({ queryKey: userKeys.all })
       // Sign out the user after successful deletion request
       authClient.signOut()
     },
     onError: (error) => {
-      const message = error instanceof APIError
-        ? error.message
-        : error instanceof Error
+      const message = error instanceof Error
         ? error.message
         : 'Failed to request account deletion'
       toast.error(message)

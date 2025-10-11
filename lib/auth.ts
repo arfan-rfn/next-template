@@ -98,4 +98,13 @@ export const auth = {
 		const session = await authClient.getSession()
 		return !!session
 	},
+
+	// Delete user account with email verification
+	deleteUser: async (callbackURL?: string) => {
+		const absoluteCallbackURL = toAbsoluteUrl(callbackURL || "/auth/account-deleted")
+
+		return await authClient.deleteUser({
+			callbackURL: absoluteCallbackURL,
+		})
+	},
 }
