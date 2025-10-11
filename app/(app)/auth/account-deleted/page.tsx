@@ -1,21 +1,18 @@
 "use client"
 
-import { Suspense, useEffect, useState } from "react"
+import { Suspense, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Icons } from "@/components/icons"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { authClient } from "@/lib/auth"
 import { useAuthContext } from "@/components/providers/auth-provider"
-import { toast } from "sonner"
+import { useCompleteAccountDeletion } from "@/hooks/use-account"
 
 function AccountDeletedContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { isAuthenticated, isLoading: authLoading } = useAuthContext()
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [isDeleted, setIsDeleted] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const completeDeletionMutation = useCompleteAccountDeletion()
 
   const token = searchParams.get("token")
 
@@ -38,42 +35,25 @@ function AccountDeletedContent() {
       return
     }
 
-    // If authenticated and have token, proceed with deletion
-    const completeAccountDeletion = async () => {
-      try {
-        setIsDeleting(true)
-        setError(null)
-
-        // Complete deletion with token (requires fresh session)
-        await authClient.deleteUser({
-          token,
-        })
-
-        // Mark as successfully deleted
-        setIsDeleted(true)
-        toast.success("Your account has been permanently deleted")
-
-        // Auto-redirect to home page after 10 seconds
-        setTimeout(() => {
-          router.push("/")
-        }, 10000)
-      } catch (err) {
-        console.error("Account deletion error:", err)
-        const errorMessage = err instanceof Error
-          ? err.message
-          : "Failed to delete account. The verification link may be invalid or expired."
-        setError(errorMessage)
-        toast.error(errorMessage)
-      } finally {
-        setIsDeleting(false)
-      }
+    // If authenticated and have token, and not already processing, proceed with deletion
+    if (!completeDeletionMutation.isPending && !completeDeletionMutation.isSuccess && !completeDeletionMutation.isError) {
+      completeDeletionMutation.mutate(token)
     }
+  }, [token, isAuthenticated, authLoading, router, completeDeletionMutation])
 
-    completeAccountDeletion()
-  }, [token, isAuthenticated, authLoading, router])
+  // Handle successful deletion - redirect after 10 seconds
+  useEffect(() => {
+    if (completeDeletionMutation.isSuccess) {
+      const timeout = setTimeout(() => {
+        router.push("/")
+      }, 10000)
 
-  // Loading state - checking authentication
-  if (authLoading || (!isDeleted && !error && isAuthenticated)) {
+      return () => clearTimeout(timeout)
+    }
+  }, [completeDeletionMutation.isSuccess, router])
+
+  // Loading state - checking authentication or processing deletion
+  if (authLoading || completeDeletionMutation.isPending) {
     return (
       <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <Card className="w-full max-w-md">
@@ -82,10 +62,10 @@ function AccountDeletedContent() {
               <Icons.Loader className="h-12 w-12 animate-spin text-muted-foreground" />
             </div>
             <CardTitle className="text-2xl">
-              {isDeleting ? "Deleting Account..." : "Verifying..."}
+              {completeDeletionMutation.isPending ? "Deleting Account..." : "Verifying..."}
             </CardTitle>
             <CardDescription>
-              {isDeleting
+              {completeDeletionMutation.isPending
                 ? "Please wait while we delete your account and all associated data"
                 : "Checking authentication status"}
             </CardDescription>
@@ -96,7 +76,10 @@ function AccountDeletedContent() {
   }
 
   // Error state
-  if (error) {
+  if (completeDeletionMutation.isError) {
+    const errorMessage = completeDeletionMutation.error instanceof Error
+      ? completeDeletionMutation.error.message
+      : "Failed to delete account. The verification link may be invalid or expired."
     return (
       <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <Card className="w-full max-w-md border-destructive">
@@ -108,7 +91,7 @@ function AccountDeletedContent() {
             </div>
             <CardTitle className="text-2xl">Deletion Failed</CardTitle>
             <CardDescription className="text-destructive">
-              {error}
+              {errorMessage}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -149,8 +132,9 @@ function AccountDeletedContent() {
     )
   }
 
-  // Success state
-  return (
+  // Success state - only show when mutation succeeded
+  if (completeDeletionMutation.isSuccess) {
+    return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-4">
@@ -208,7 +192,11 @@ function AccountDeletedContent() {
         </CardContent>
       </Card>
     </div>
-  )
+    )
+  }
+
+  // Default fallback (should not reach here)
+  return null
 }
 
 function LoadingFallback() {

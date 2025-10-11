@@ -50,7 +50,14 @@ export function useDeleteAccount() {
   return useMutation({
     mutationFn: async () => {
       // Use Better Auth's deleteUser with email verification
-      return await auth.deleteUser('/auth/account-deleted')
+      const response = await auth.deleteUser('/auth/account-deleted')
+
+      // Better Auth returns { data, error } instead of throwing
+      if (response.error) {
+        throw new Error(response.error.message || 'Failed to request account deletion')
+      }
+
+      return response.data
     },
     onSuccess: () => {
       toast.success('Account deletion verification email sent. Please check your email to complete the process.')
@@ -63,6 +70,37 @@ export function useDeleteAccount() {
       const message = error instanceof Error
         ? error.message
         : 'Failed to request account deletion'
+      toast.error(message)
+    },
+  })
+}
+
+export function useCompleteAccountDeletion() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (token: string) => {
+      // Complete deletion with token (requires fresh session)
+      const response = await authClient.deleteUser({
+        token,
+      })
+
+      // Better Auth returns { data, error } instead of throwing
+      if (response.error) {
+        throw new Error(response.error.message || 'Failed to delete account')
+      }
+
+      return response.data
+    },
+    onSuccess: async () => {
+      toast.success('Your account has been permanently deleted')
+      // Sign out the user after successful deletion
+      await authClient.signOut()
+    },
+    onError: (error) => {
+      const message = error instanceof Error
+        ? error.message
+        : 'Failed to delete account. The verification link may be invalid or expired.'
       toast.error(message)
     },
   })
