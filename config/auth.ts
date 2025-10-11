@@ -21,10 +21,10 @@ export type AuthConfig = {
 
 export const authConfig: AuthConfig = {
   methods: {
-    emailPassword: true,
+    emailPassword: false,
     magicLink: true,
     google: true,
-    apple: true,
+    apple: false,
   },
   redirects: {
     afterSignIn: "/dashboard",

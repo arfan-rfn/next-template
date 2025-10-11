@@ -41,11 +41,11 @@ export const siteConfig = {
         },
         {
           name: "Terms and Conditions",
-          url: "/terms-conditions",
+          url: "/legal/terms",
         },
         {
           name: "Privacy Policy",
-          url: "/privacy-policy",
+          url: "/legal/privacy",
         }
       ],
       "Links": [

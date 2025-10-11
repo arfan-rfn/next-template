@@ -390,6 +390,27 @@ function SignInContent() {
 						)}
 					</div>
 
+					{/* Privacy Statement */}
+					<div className="text-center">
+						<p className="text-xs text-muted-foreground">
+							By signing in, you agree to our{" "}
+							<a
+								href="/legal/terms"
+								className="font-medium text-primary hover:text-primary/80 underline underline-offset-4"
+							>
+								Terms of Service
+							</a>{" "}
+							and{" "}
+							<a
+								href="/legal/privacy"
+								className="font-medium text-primary hover:text-primary/80 underline underline-offset-4"
+							>
+								Privacy Policy
+							</a>
+							.
+						</p>
+					</div>
+
 					{/* Footer */}
 					{authConfig.methods.emailPassword && (
 					<div className="text-center">
