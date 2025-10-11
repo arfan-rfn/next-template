@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   Form,
@@ -36,6 +37,9 @@ interface WelcomeModalProps {
 
 const profileSchema = z.object({
   name: z.string().min(1, "Name is required").min(2, "Name must be at least 2 characters"),
+  agreeToTerms: z.boolean().refine((val) => val === true, {
+    message: "You must agree to the Terms of Service and Privacy Policy to continue",
+  }),
 })
 
 type ProfileFormValues = z.infer<typeof profileSchema>
@@ -51,6 +55,7 @@ export function WelcomeModal({ open, onOpenChange }: WelcomeModalProps) {
     resolver: zodResolver(profileSchema),
     defaultValues: {
       name: "",
+      agreeToTerms: false,
     },
   })
 
@@ -167,6 +172,47 @@ export function WelcomeModal({ open, onOpenChange }: WelcomeModalProps) {
                     <Input placeholder="Enter your full name" {...field} />
                   </FormControl>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Terms Agreement */}
+            <FormField
+              control={form.control}
+              name="agreeToTerms"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center space-x-3 space-y-0 pt-2">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="flex-1 leading-tight">
+                    <FormLabel className="text-sm font-normal text-muted-foreground cursor-pointer">
+                      I agree to the{" "}
+                      <a
+                        href="/legal/terms"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-medium text-foreground hover:text-primary underline underline-offset-2"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Terms of Service
+                      </a>{" "}
+                      and{" "}
+                      <a
+                        href="/legal/privacy"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-medium text-foreground hover:text-primary underline underline-offset-2"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Privacy Policy
+                      </a>
+                    </FormLabel>
+                    <FormMessage className="mt-1" />
+                  </div>
                 </FormItem>
               )}
             />
