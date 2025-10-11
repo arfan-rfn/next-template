@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { Suspense, useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Icons } from "@/components/icons"
@@ -9,7 +9,7 @@ import { auth } from "@/lib/auth"
 import { useAuthContext } from "@/components/providers/auth-provider"
 import { useAuthConfig } from "@/hooks/use-auth-config"
 
-export default function SignInPage() {
+function SignInContent() {
 	const router = useRouter()
 	const searchParams = useSearchParams()
 	const { refresh, isAuthenticated, isLoading: authLoading } = useAuthContext()
@@ -407,5 +407,26 @@ export default function SignInPage() {
 				</div>
 			</div>
 		</div>
+	)
+}
+
+function SignInLoadingFallback() {
+	return (
+		<div className="flex min-h-[calc(100vh-4rem)] items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+			<div className="w-full max-w-md space-y-8">
+				<div className="text-center">
+					<Icons.Circle className="mx-auto h-8 w-8 animate-spin" />
+					<p className="mt-2 text-sm text-muted-foreground">Loading...</p>
+				</div>
+			</div>
+		</div>
+	)
+}
+
+export default function SignInPage() {
+	return (
+		<Suspense fallback={<SignInLoadingFallback />}>
+			<SignInContent />
+		</Suspense>
 	)
 }

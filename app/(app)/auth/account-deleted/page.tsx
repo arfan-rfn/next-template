@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Icons } from "@/components/icons"
@@ -9,7 +9,7 @@ import { authClient } from "@/lib/auth"
 import { useAuthContext } from "@/components/providers/auth-provider"
 import { toast } from "sonner"
 
-export default function AccountDeletedPage() {
+function AccountDeletedContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { isAuthenticated, isLoading: authLoading } = useAuthContext()
@@ -208,5 +208,31 @@ export default function AccountDeletedPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+function LoadingFallback() {
+  return (
+    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center space-y-4">
+          <div className="flex justify-center">
+            <Icons.Loader className="h-12 w-12 animate-spin text-muted-foreground" />
+          </div>
+          <CardTitle className="text-2xl">Loading...</CardTitle>
+          <CardDescription>
+            Please wait
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    </div>
+  )
+}
+
+export default function AccountDeletedPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <AccountDeletedContent />
+    </Suspense>
   )
 }
