@@ -19,11 +19,18 @@ import {
 	CommandSeparator,
 } from "./ui/command"
 import { Button } from "./ui/button"
+import { Kbd, KbdGroup } from "./ui/kbd"
 
 export function Search({ ...props }: AlertDialogProps) {
 	const router = useRouter()
 	const [open, setOpen] = React.useState(false)
 	const { setTheme } = useTheme()
+	const [isMac, setIsMac] = React.useState(false)
+
+	React.useEffect(() => {
+		// Detect OS
+		setIsMac(/(Mac|iPhone|iPod|iPad)/i.test(navigator.platform))
+	}, [])
 
 	React.useEffect(() => {
 		const down = (e: KeyboardEvent) => {
@@ -61,11 +68,12 @@ export function Search({ ...props }: AlertDialogProps) {
 				onClick={() => setOpen(true)}
 				{...props}
 			>
-				<span className="hidden lg:inline-flex">Search documentation...</span>
-				<span className="inline-flex lg:hidden">Search...</span>
-				<kbd className="pointer-events-none absolute right-[0.3rem] top-[0.3rem] hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
-					<span className="text-xs">⌘</span>K
-				</kbd>
+				<Icons.Search className="mr-2 size-4" />
+				<span className="inline-flex">Search...</span>
+				<KbdGroup className="pointer-events-none absolute right-[0.3rem] top-[0.3rem] hidden sm:inline-flex">
+					<Kbd>{isMac ? "⌘" : "Ctrl"}</Kbd>
+					<Kbd>K</Kbd>
+				</KbdGroup>
 			</Button>
 			<CommandDialog open={open} onOpenChange={setOpen}>
 				<CommandInput placeholder="Type a command or search..." />

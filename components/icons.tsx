@@ -13,6 +13,7 @@ import {
   Mail,
   Menu,
   Moon,
+  Search,
   SunMedium,
   User2,
   Settings,
@@ -54,6 +55,7 @@ export const Icons = {
   Location: MapPin,
   Key: Key,
   Calendar: Calendar,
+  Search: Search,
   Logo: (props: LucideProps) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" {...props}>
       <path
