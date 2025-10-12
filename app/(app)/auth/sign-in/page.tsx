@@ -150,8 +150,8 @@ function SignInContent() {
 				</div>
 
 				{/* Sign In Form */}
-				<div className="mt-8 space-y-6">
-					<div className="space-y-4">
+				<div className="mt-8 space-y-8">
+					<div className="space-y-5">
 						{/* Magic Link Section - First Priority */}
 						{authConfig.methods.magicLink && !magicLinkSent ? (
 							<>
@@ -391,8 +391,8 @@ function SignInContent() {
 					</div>
 
 					{/* Privacy Statement */}
-					<div className="text-center">
-						<p className="text-xs text-muted-foreground">
+					<div className="text-center mt-8 pt-6 border-t">
+						<p className="text-sm text-muted-foreground leading-relaxed px-4">
 							By signing in, you agree to our{" "}
 							<a
 								href="/legal/terms"
@@ -413,7 +413,7 @@ function SignInContent() {
 
 					{/* Footer */}
 					{authConfig.methods.emailPassword && (
-					<div className="text-center">
+					<div className="text-center mt-6">
 						<p className="text-sm text-muted-foreground">
 							Don&apos;t have an account?{" "}
 							<a
