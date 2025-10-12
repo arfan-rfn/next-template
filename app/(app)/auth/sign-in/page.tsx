@@ -391,23 +391,9 @@ function SignInContent() {
 					</div>
 
 					{/* Privacy Statement */}
-					<div className="text-center mt-8 pt-6 border-t">
-						<p className="text-sm text-muted-foreground leading-relaxed px-4">
-							By signing in, you agree to our{" "}
-							<a
-								href="/legal/terms"
-								className="font-medium text-primary hover:text-primary/80 underline underline-offset-4"
-							>
-								Terms of Service
-							</a>{" "}
-							and{" "}
-							<a
-								href="/legal/privacy"
-								className="font-medium text-primary hover:text-primary/80 underline underline-offset-4"
-							>
-								Privacy Policy
-							</a>
-							.
+					<div className="text-center mt-auto pt-8 border-t">
+						<p className="text-sm text-muted-foreground leading-relaxed px-2">
+							By signing in, you agree to our <br /><a href="/legal/terms" className="font-medium text-primary hover:text-primary/80 underline underline-offset-4">Terms of Service</a> and <a href="/legal/privacy" className="font-medium text-primary hover:text-primary/80 underline underline-offset-4">Privacy Policy</a>.
 						</p>
 					</div>
 
