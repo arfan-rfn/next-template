@@ -6,6 +6,16 @@ A Next.js 13 template for building apps with Radix UI and Tailwind CSS.
 
 ```bash
 npx create-next-app -e https://github.com/arfan-rfn/next-template
+# or
+pnpm create next-app -e https://github.com/arfan-rfn/next-template
+```
+
+## Installation
+
+After cloning, install dependencies with:
+
+```bash
+pnpm install
 ```
 
 ## Features

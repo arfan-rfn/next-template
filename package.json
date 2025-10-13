@@ -2,6 +2,7 @@
   "name": "next-template",
   "version": "0.0.3",
   "private": true,
+  "packageManager": "pnpm@9.0.0",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build && next-sitemap",
@@ -12,7 +13,7 @@
     "typecheck": "tsc --noEmit",
     "format:write": "prettier --write \"**/*.{ts,tsx,mdx}\" --cache",
     "format:check": "prettier --check \"**/*.{ts,tsx,mdx}\" --cache",
-    "npm:update": "npm i -g npm-check-updates && ncu -u && npm i"
+    "update": "pnpm up --latest"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
