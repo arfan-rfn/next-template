@@ -37,7 +37,7 @@ This is a Next.js 15+ application using App Router with the following key archit
 - **State Management**: Zustand stores in `stores/`
 - **Data Fetching**: TanStack Query with server state management
 - **Authentication**: Better Auth library (email/password + Google OAuth)
-- **Database**: MongoDB via native driver
+- **Database**: Managed by external Hono API backend
 - **Validation**: Zod schemas throughout
 - **File Storage**: AWS S3 integration via presigned URLs
 
@@ -86,9 +86,9 @@ This is a Next.js 15+ application using App Router with the following key archit
 
 ### Environment Setup
 Copy `.env.example` to `.env.local` and configure:
-- MongoDB connection string
-- AWS credentials for S3
-- Authentication secrets
+- Backend API URL
+- AWS credentials for S3 (if using file uploads)
+- Authentication secrets (managed on backend)
 - Analytics IDs
 
 ### Testing

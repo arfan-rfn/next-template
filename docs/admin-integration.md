@@ -30,17 +30,7 @@ The admin integration allows users with admin roles to:
 
 Since the admin plugin is configured on your API server, you need to update a user's role on the backend. There are several ways to do this:
 
-### Method 1: Direct Database Update
-Connect to your MongoDB database and update the user's role:
-
-```javascript
-db.users.updateOne(
-  { email: "admin@example.com" },
-  { $set: { role: "admin" } }
-)
-```
-
-### Method 2: Using Better Auth API
+### Method 1: Using Better Auth API
 If you have access to your API server, you can use the Better Auth admin API:
 
 ```typescript
@@ -50,7 +40,7 @@ await auth.api.setRole({
 })
 ```
 
-### Method 3: Environment Configuration
+### Method 2: Environment Configuration
 You can configure admin users by ID in your Better Auth server configuration:
 
 ```typescript
@@ -99,13 +89,7 @@ const { data } = useListUsers({
 - All search parameters follow Better Auth API specification
 
 **Case Sensitivity Note:**
-The frontend converts search queries to lowercase, but true case-insensitive search requires backend support. For MongoDB-based Better Auth backends, implement one of these solutions:
-
-1. **Collation** (recommended): Configure case-insensitive collation on your user collection
-2. **Case-insensitive regex**: Use `$regex` with `$options: 'i'` in Better Auth queries
-3. **Lowercase fields**: Store lowercase versions of searchable fields (e.g., `nameLower`, `emailLower`)
-
-See `plan/admin-user-search-improvements.md` for detailed backend implementation instructions.
+The frontend converts search queries to lowercase, but true case-insensitive search requires backend support. Consult your backend database documentation for implementing case-insensitive search in Better Auth queries.
 
 #### Create User
 ```typescript

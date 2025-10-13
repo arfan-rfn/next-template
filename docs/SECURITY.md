@@ -231,7 +231,7 @@ npm outdated
 ### Data Protection
 - Passwords: hashed with scrypt ✅
 - Sessions: encrypted cookies ✅
-- User data: stored securely in MongoDB
+- User data: stored securely in backend database
 - API: HTTPS only in production
 
 ---
