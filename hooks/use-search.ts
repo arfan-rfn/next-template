@@ -16,10 +16,7 @@ import type {
 
 // Navigation URL mapper for each category
 const CATEGORY_URL_MAPPERS = {
-  users: (item: UserSearchResult) => `/admin/users/${item.id}`,
-  feedback: (item: FeedbackSearchResult) => `/admin/feedback/${item.id}`,
-  files: (item: FileSearchResult) => `/files/${item.id}`,
-  audit: (item: AuditSearchResult) => `/admin/audit/${item.id}`,
+  users: (item: UserSearchResult) => `/users/${item.id}`,
 } as const;
 
 // Process search results - add URL field to each item
@@ -33,33 +30,6 @@ function processSearchResults(response: SearchResponse): SearchResponse {
             items: response.results.users.items.map((item) => ({
               ...item,
               url: CATEGORY_URL_MAPPERS.users(item),
-            })),
-          }
-        : undefined,
-      feedback: response.results.feedback
-        ? {
-            ...response.results.feedback,
-            items: response.results.feedback.items.map((item) => ({
-              ...item,
-              url: CATEGORY_URL_MAPPERS.feedback(item),
-            })),
-          }
-        : undefined,
-      files: response.results.files
-        ? {
-            ...response.results.files,
-            items: response.results.files.items.map((item) => ({
-              ...item,
-              navigationUrl: CATEGORY_URL_MAPPERS.files(item),
-            })),
-          }
-        : undefined,
-      audit: response.results.audit
-        ? {
-            ...response.results.audit,
-            items: response.results.audit.items.map((item) => ({
-              ...item,
-              url: CATEGORY_URL_MAPPERS.audit(item),
             })),
           }
         : undefined,
