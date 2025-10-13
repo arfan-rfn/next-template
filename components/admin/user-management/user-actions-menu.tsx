@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { MoreHorizontal, Edit, Shield, Ban, Trash2, Eye, UserCheck } from "lucide-react"
+import { MoreHorizontal, Edit, Shield, Ban, Trash2, Eye, UserCheck, UserCog } from "lucide-react"
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -33,12 +33,13 @@ import {
 
 interface UserActionsMenuProps {
 	user: User
+	onViewProfile?: (user: User) => void
 }
 
 /**
  * Dropdown menu with actions for a user
  */
-export function UserActionsMenu({ user }: UserActionsMenuProps) {
+export function UserActionsMenu({ user, onViewProfile }: UserActionsMenuProps) {
 	const [editOpen, setEditOpen] = useState(false)
 	const [roleOpen, setRoleOpen] = useState(false)
 	const [banOpen, setBanOpen] = useState(false)
@@ -101,6 +102,14 @@ export function UserActionsMenu({ user }: UserActionsMenuProps) {
 					<DropdownMenuLabel>Actions</DropdownMenuLabel>
 					<DropdownMenuSeparator />
 
+					{/* View Profile - always available */}
+					<DropdownMenuItem onClick={() => onViewProfile?.(user)}>
+						<Eye className="mr-2 h-4 w-4" />
+						View Profile
+					</DropdownMenuItem>
+
+					<DropdownMenuSeparator />
+
 					{/* Edit - requires permission + role hierarchy check */}
 					{canUpdate && (
 						<DropdownMenuItem onClick={() => setEditOpen(true)}>
@@ -137,7 +146,7 @@ export function UserActionsMenu({ user }: UserActionsMenuProps) {
 					{/* Impersonate - requires permission + role hierarchy check */}
 					{canImpersonate && (
 						<DropdownMenuItem onClick={handleImpersonate} disabled={isImpersonating}>
-							<Eye className="mr-2 h-4 w-4" />
+							<UserCog className="mr-2 h-4 w-4" />
 							{isImpersonating ? 'Impersonating...' : 'Impersonate'}
 						</DropdownMenuItem>
 					)}

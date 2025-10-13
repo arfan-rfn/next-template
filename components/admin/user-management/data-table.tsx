@@ -62,6 +62,11 @@ export function DataTable<TData, TValue>({
 	const [selectedUser, setSelectedUser] = React.useState<User | null>(null)
 	const [dialogOpen, setDialogOpen] = React.useState(false)
 
+	const handleUserClick = (user: TData) => {
+		setSelectedUser(user as unknown as User)
+		setDialogOpen(true)
+	}
+
 	const table = useReactTable({
 		data,
 		columns,
@@ -79,12 +84,10 @@ export function DataTable<TData, TValue>({
 				pageSize,
 			},
 		},
+		meta: {
+			onUserClick: handleUserClick,
+		},
 	})
-
-	const handleRowClick = (user: TData) => {
-		setSelectedUser(user as unknown as User)
-		setDialogOpen(true)
-	}
 
 	return (
 		<div className="space-y-4">
@@ -162,8 +165,7 @@ export function DataTable<TData, TValue>({
 							table.getRowModel().rows.map((row) => (
 								<TableRow
 									key={row.id}
-									className="hover:bg-muted/50 transition-colors cursor-pointer"
-									onClick={() => handleRowClick(row.original)}
+									className="hover:bg-muted/50 transition-colors"
 								>
 									{row.getVisibleCells().map((cell) => (
 										<TableCell key={cell.id}>

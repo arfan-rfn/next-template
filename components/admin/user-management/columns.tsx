@@ -68,18 +68,24 @@ export const columns: ColumnDef<User>[] = [
 				</Button>
 			)
 		},
-		cell: ({ row }) => {
+		cell: ({ row, table }) => {
 			const user = row.original
+			// Access the onUserClick callback from table meta
+			const onUserClick = (table.options.meta as any)?.onUserClick
+
 			return (
-				<div className="flex items-center gap-3">
-					<Avatar className="h-10 w-10 shrink-0">
+				<div
+					className="flex items-center gap-3 cursor-pointer py-1 -mx-2 px-2 rounded-md transition-all duration-200 hover:bg-muted/50 group"
+					onClick={() => onUserClick?.(user)}
+				>
+					<Avatar className="h-10 w-10 shrink-0 ring-2 ring-transparent group-hover:ring-primary/20 transition-all">
 						<AvatarImage src={user.image || undefined} alt={user.name} />
 						<AvatarFallback className="bg-primary/10 text-primary font-semibold">
 							{getInitials(user.name)}
 						</AvatarFallback>
 					</Avatar>
 					<div className="flex flex-col min-w-0">
-						<span className="font-medium truncate">{user.name}</span>
+						<span className="font-medium truncate group-hover:text-primary transition-colors">{user.name}</span>
 						<div className="flex items-center gap-1 text-sm text-muted-foreground">
 							<Mail className="h-3 w-3 shrink-0" />
 							<span className="truncate">{user.email}</span>
@@ -180,8 +186,16 @@ export const columns: ColumnDef<User>[] = [
 	},
 	{
 		id: "actions",
-		cell: ({ row }) => {
-			return <UserActionsMenu user={row.original} />
+		cell: ({ row, table }) => {
+			// Access the onUserClick callback from table meta
+			const onUserClick = (table.options.meta as any)?.onUserClick
+
+			return (
+				<UserActionsMenu
+					user={row.original}
+					onViewProfile={onUserClick}
+				/>
+			)
 		},
 	},
 ]

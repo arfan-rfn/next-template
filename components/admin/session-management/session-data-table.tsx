@@ -54,6 +54,11 @@ export function SessionDataTable<TData, TValue>({
 	const [selectedSession, setSelectedSession] = React.useState<Session | null>(null)
 	const [dialogOpen, setDialogOpen] = React.useState(false)
 
+	const handleSessionClick = (session: TData) => {
+		setSelectedSession(session as unknown as Session)
+		setDialogOpen(true)
+	}
+
 	const table = useReactTable({
 		data,
 		columns,
@@ -65,12 +70,10 @@ export function SessionDataTable<TData, TValue>({
 			sorting,
 			columnVisibility,
 		},
+		meta: {
+			onSessionClick: handleSessionClick,
+		},
 	})
-
-	const handleRowClick = (session: TData) => {
-		setSelectedSession(session as unknown as Session)
-		setDialogOpen(true)
-	}
 
 	return (
 		<div className="space-y-4">
@@ -169,8 +172,7 @@ export function SessionDataTable<TData, TValue>({
 							table.getRowModel().rows.map((row) => (
 								<TableRow
 									key={row.id}
-									className="hover:bg-muted/50 transition-colors cursor-pointer"
-									onClick={() => handleRowClick(row.original)}
+									className="hover:bg-muted/50 transition-colors"
 								>
 									{row.getVisibleCells().map((cell) => (
 										<TableCell key={cell.id}>

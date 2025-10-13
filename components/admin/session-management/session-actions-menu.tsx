@@ -1,6 +1,6 @@
 "use client"
 
-import { MoreHorizontal, Ban } from "lucide-react"
+import { MoreHorizontal, Ban, Eye } from "lucide-react"
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -28,12 +28,13 @@ import { useState } from "react"
 
 interface SessionActionsMenuProps {
 	session: Session
+	onViewDetails?: (session: Session) => void
 }
 
 /**
  * Dropdown menu with actions for a session
  */
-export function SessionActionsMenu({ session }: SessionActionsMenuProps) {
+export function SessionActionsMenu({ session, onViewDetails }: SessionActionsMenuProps) {
 	const [revokeOpen, setRevokeOpen] = useState(false)
 
 	// Permission check
@@ -65,6 +66,14 @@ export function SessionActionsMenu({ session }: SessionActionsMenuProps) {
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
 					<DropdownMenuLabel>Actions</DropdownMenuLabel>
+					<DropdownMenuSeparator />
+
+					{/* View Details - always available */}
+					<DropdownMenuItem onClick={() => onViewDetails?.(session)}>
+						<Eye className="mr-2 h-4 w-4" />
+						View Details
+					</DropdownMenuItem>
+
 					<DropdownMenuSeparator />
 
 					{/* Revoke session */}

@@ -81,15 +81,20 @@ export const columns: ColumnDef<Session>[] = [
 				</Button>
 			)
 		},
-		cell: ({ row }) => {
+		cell: ({ row, table }) => {
 			const session = row.original
 			const { browser, os } = parseUserAgent(session.userAgent ?? undefined)
+			// Access the onSessionClick callback from table meta
+			const onSessionClick = (table.options.meta as any)?.onSessionClick
 
 			return (
-				<div className="flex flex-col min-w-0 py-2">
+				<div
+					className="flex flex-col min-w-0 py-2 -mx-2 px-2 rounded-md cursor-pointer transition-all duration-200 hover:bg-muted/50 group"
+					onClick={() => onSessionClick?.(session)}
+				>
 					<div className="flex items-center gap-2">
-						<Monitor className="h-4 w-4 text-muted-foreground shrink-0" />
-						<span className="font-medium text-sm">{browser} on {os}</span>
+						<Monitor className="h-4 w-4 text-muted-foreground shrink-0 group-hover:text-primary transition-colors" />
+						<span className="font-medium text-sm group-hover:text-primary transition-colors">{browser} on {os}</span>
 					</div>
 					<div className="flex items-center gap-1 text-xs text-muted-foreground/70 font-mono mt-1">
 						<span className="truncate" title={session.id}>ID: {session.id.slice(0, 12)}...</span>
@@ -201,8 +206,16 @@ export const columns: ColumnDef<Session>[] = [
 	},
 	{
 		id: "actions",
-		cell: ({ row }) => {
-			return <SessionActionsMenu session={row.original} />
+		cell: ({ row, table }) => {
+			// Access the onSessionClick callback from table meta
+			const onSessionClick = (table.options.meta as any)?.onSessionClick
+
+			return (
+				<SessionActionsMenu
+					session={row.original}
+					onViewDetails={onSessionClick}
+				/>
+			)
 		},
 	},
 ]
