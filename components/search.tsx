@@ -8,6 +8,8 @@ import { Icons } from "./icons"
 
 import { cn } from "@/lib/utils"
 import { searchSuggestion } from "@/config/search-suggestion"
+import { useSearch, useLoadMore, type CategoryState } from "@/hooks/use-search"
+import type { UserSearchResult } from "@/lib/types/search"
 
 import {
 	CommandDialog,
@@ -20,17 +22,80 @@ import {
 } from "./ui/command"
 import { Button } from "./ui/button"
 import { Kbd, KbdGroup } from "./ui/kbd"
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
+import { Badge } from "./ui/badge"
 
 export function Search({ ...props }: AlertDialogProps) {
 	const router = useRouter()
 	const [open, setOpen] = React.useState(false)
 	const { setTheme } = useTheme()
 	const [isMac, setIsMac] = React.useState(false)
+	const [searchQuery, setSearchQuery] = React.useState("")
+
+	// State for users pagination
+	const [usersState, setUsersState] = React.useState<CategoryState<UserSearchResult>>({
+		items: [],
+		page: 1,
+		hasMore: false,
+		isLoadingMore: false,
+	})
+
+	// Main search hook
+	const { data: searchData, isLoading, error } = useSearch(searchQuery, {
+		category: "all",
+		limit: 5,
+	})
+
+	// Load more hook for users
+	const { data: loadMoreData, refetch: loadMoreUsers } = useLoadMore(
+		searchQuery,
+		"users",
+		usersState.page + 1
+	)
 
 	React.useEffect(() => {
 		// Detect OS
 		setIsMac(/(Mac|iPhone|iPod|iPad)/i.test(navigator.platform))
 	}, [])
+
+	// Update users state when search results change
+	React.useEffect(() => {
+		if (searchData?.results.users) {
+			setUsersState({
+				items: searchData.results.users.items,
+				page: searchData.results.users.page,
+				hasMore: searchData.results.users.hasMore,
+				isLoadingMore: false,
+			})
+		} else {
+			// Reset state when no results
+			setUsersState({
+				items: [],
+				page: 1,
+				hasMore: false,
+				isLoadingMore: false,
+			})
+		}
+	}, [searchData])
+
+	// Handle load more data
+	React.useEffect(() => {
+		if (loadMoreData?.results.users) {
+			setUsersState((prev) => ({
+				items: [...prev.items, ...loadMoreData.results.users!.items],
+				page: loadMoreData.results.users!.page,
+				hasMore: loadMoreData.results.users!.hasMore,
+				isLoadingMore: false,
+			}))
+		}
+	}, [loadMoreData])
+
+	// Reset search query when dialog closes
+	React.useEffect(() => {
+		if (!open) {
+			setSearchQuery("")
+		}
+	}, [open])
 
 	React.useEffect(() => {
 		const down = (e: KeyboardEvent) => {
@@ -58,6 +123,13 @@ export function Search({ ...props }: AlertDialogProps) {
 		command()
 	}, [])
 
+	const handleLoadMore = React.useCallback(async () => {
+		if (usersState.isLoadingMore || !usersState.hasMore) return
+
+		setUsersState((prev) => ({ ...prev, isLoadingMore: true }))
+		await loadMoreUsers()
+	}, [usersState.isLoadingMore, usersState.hasMore, loadMoreUsers])
+
 	return (
 		<>
 			<Button
@@ -75,44 +147,134 @@ export function Search({ ...props }: AlertDialogProps) {
 					<Kbd>K</Kbd>
 				</KbdGroup>
 			</Button>
-			<CommandDialog open={open} onOpenChange={setOpen}>
-				<CommandInput placeholder="Type a command or search..." />
+			<CommandDialog open={open} onOpenChange={setOpen} shouldFilter={false}>
+				<CommandInput
+					placeholder="Type a command or search..."
+					value={searchQuery}
+					onValueChange={setSearchQuery}
+				/>
 				<CommandList>
-					<CommandEmpty>No results found.</CommandEmpty>
+					{isLoading ? (
+						<div className="flex items-center justify-center py-6">
+							<Icons.Spinner className="h-6 w-6 animate-spin" />
+						</div>
+					) : error ? (
+						<CommandEmpty>
+							<div className="flex flex-col items-center gap-2 py-4">
+								<Icons.AlertCircle className="h-8 w-8 text-destructive" />
+								<p className="text-sm">Failed to fetch search results</p>
+								<Button size="sm" onClick={() => window.location.reload()}>
+									Retry
+								</Button>
+							</div>
+						</CommandEmpty>
+					) : searchQuery.length >= 2 && searchData ? (
+						<>
+							{/* User Search Results */}
+							{usersState.items.length > 0 && (
+								<CommandGroup heading={`Users (${searchData.results.users?.total || 0})`}>
+									{usersState.items.map((user) => (
+										<CommandItem
+											key={user.id}
+											value={`${user.name} ${user.email}`}
+											onSelect={() => {
+												if (user.url) {
+													runCommand(() => router.push(user.url!))
+												}
+											}}
+										>
+											<Avatar className="mr-2 h-6 w-6">
+												<AvatarImage src={user.image || undefined} alt={user.name} />
+												<AvatarFallback>{user.name[0]?.toUpperCase()}</AvatarFallback>
+											</Avatar>
+											<div className="flex-1">
+												<div className="font-medium">{user.name}</div>
+												<div className="text-xs text-muted-foreground">{user.email}</div>
+											</div>
+											{user.role && (
+												<Badge variant="secondary">{user.role}</Badge>
+											)}
+										</CommandItem>
+									))}
+									{/* Load More Button */}
+									{usersState.hasMore && (
+										<CommandItem
+											onSelect={handleLoadMore}
+											disabled={usersState.isLoadingMore}
+										>
+											<div className="flex items-center gap-2 w-full justify-center">
+												{usersState.isLoadingMore ? (
+													<>
+														<Icons.Spinner className="h-4 w-4 animate-spin" />
+														<span>Loading...</span>
+													</>
+												) : (
+													<>
+														<Icons.ChevronDown className="h-4 w-4" />
+														<span>
+															Load {(searchData.results.users?.total || 0) - usersState.items.length} more users
+														</span>
+													</>
+												)}
+											</div>
+										</CommandItem>
+									)}
+								</CommandGroup>
+							)}
 
-					{searchSuggestion.map((group) => (
-						<CommandGroup key={group.title} heading={group.title}>
-							{group.items && group.items.map((navItem) => (
-								<CommandItem
-									key={navItem.href}
-									value={navItem.title}
-									onSelect={() => {
-										runCommand(() => router.push(navItem.href as string))
-									}}
-								>
-									<div className="mr-2 flex size-4 items-center justify-center">
-										<Icons.Circle className="size-3" />
-									</div>
-									{navItem.title}
-								</CommandItem>
-							))}
-						</CommandGroup>
-					))}
-					<CommandSeparator />
-					<CommandGroup heading="Theme">
-						<CommandItem onSelect={() => runCommand(() => setTheme("light"))}>
-							<Icons.Sun className="mr-2 size-4" />
-							Light
-						</CommandItem>
-						<CommandItem onSelect={() => runCommand(() => setTheme("dark"))}>
-							<Icons.Moon className="mr-2 size-4" />
-							Dark
-						</CommandItem>
-						<CommandItem onSelect={() => runCommand(() => setTheme("system"))}>
-							<Icons.System className="mr-2 size-4" />
-							System
-						</CommandItem>
-					</CommandGroup>
+							{/* No Results */}
+							{usersState.items.length === 0 && (
+								<CommandEmpty>
+									No results found for &quot;{searchQuery}&quot;
+								</CommandEmpty>
+							)}
+						</>
+					) : (
+						<>
+							{/* Static Suggestions */}
+							<CommandEmpty>
+								{searchQuery.length === 1 ? "Type at least 2 characters to search..." : "No results found."}
+							</CommandEmpty>
+
+							{searchQuery.length === 0 && (
+								<>
+									{searchSuggestion.map((group) => (
+										<CommandGroup key={group.title} heading={group.title}>
+											{group.items && group.items.map((navItem) => (
+												<CommandItem
+													key={navItem.href}
+													value={navItem.title}
+													onSelect={() => {
+														runCommand(() => router.push(navItem.href as string))
+													}}
+												>
+													<div className="mr-2 flex size-4 items-center justify-center">
+														<Icons.Circle className="size-3" />
+													</div>
+													{navItem.title}
+												</CommandItem>
+											))}
+										</CommandGroup>
+									))}
+									<CommandSeparator />
+									<CommandGroup heading="Theme">
+										<CommandItem onSelect={() => runCommand(() => setTheme("light"))}>
+											<Icons.Sun className="mr-2 size-4" />
+											Light
+										</CommandItem>
+										<CommandItem onSelect={() => runCommand(() => setTheme("dark"))}>
+											<Icons.Moon className="mr-2 size-4" />
+											Dark
+										</CommandItem>
+										<CommandItem onSelect={() => runCommand(() => setTheme("system"))}>
+											<Icons.System className="mr-2 size-4" />
+											System
+										</CommandItem>
+									</CommandGroup>
+								</>
+							)}
+						</>
+					)}
 				</CommandList>
 			</CommandDialog>
 		</>
