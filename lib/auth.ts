@@ -78,11 +78,10 @@ export const auth = {
 	},
 
 	// Verify magic link token
-	verifyMagicLink: async (token: string, callbackURL?: string) => {
+	verifyMagicLink: async (token: string) => {
 		return await authClient.magicLink.verify({
 			query: {
 				token,
-				callbackURL: callbackURL || "/dashboard",
 			},
 		})
 	},

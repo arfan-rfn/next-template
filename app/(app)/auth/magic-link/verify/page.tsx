@@ -21,38 +21,42 @@ function VerifyContent() {
 		setStatus("error")
 		setErrorMessage(message)
 		toast.error(message)
-		// Redirect to sign-in after 3 seconds
+		// Redirect to sign-in after 2 seconds
 		setTimeout(() => {
 			router.push("/auth/sign-in")
-		}, 3000)
+		}, 2000)
 	}, [router])
 
 	useEffect(() => {
 		const verifyMagicLink = async () => {
 			// Extract token from URL
 			const token = searchParams.get("token")
-			const redirect = searchParams.get("redirect") || authConfig.redirects.afterSignIn
+			const callbackUrl = searchParams.get("redirect") || authConfig.redirects.afterSignIn
 
 			// Validate token exists
 			if (!token) {
-				handleError("No verification token found in the URL. Please try requesting a new magic link.")
+				handleError("Invalid magic link. Please request a new one.")
 				return
 			}
 
 			try {
 				// Verify the magic link token
-				const { data, error } = await auth.verifyMagicLink(token, redirect)
+				// Don't pass callbackURL to let us handle redirect client-side
+				const { error } = await auth.verifyMagicLink(token)
 
 				if (error) {
-					// Handle specific error cases
-					let errorMsg = ""
-					if (error.message?.includes("expired")) {
-						errorMsg = "This magic link has expired. Please request a new one."
-					} else if (error.message?.includes("invalid")) {
-						errorMsg = "This magic link is invalid. Please request a new one."
-					} else {
-						errorMsg = error.message || "Failed to verify magic link. Please try again."
+					// Handle verification error
+					console.error("Magic link verification error:", error)
+
+					let errorMsg = "Failed to verify magic link"
+					if (error.message) {
+						errorMsg = error.message
+					} else if (error.status === 400) {
+						errorMsg = "Invalid or expired magic link"
+					} else if (error.status === 404) {
+						errorMsg = "Magic link not found"
 					}
+
 					handleError(errorMsg)
 					return
 				}
@@ -60,13 +64,12 @@ function VerifyContent() {
 				// Verification successful
 				setStatus("success")
 
-				// Refresh auth context to update session
-				await refresh()
+				// Refresh auth context to ensure client state is synchronized
+				refresh()
+				toast.success("Successfully signed in!")
 
-				// Redirect to intended destination after a brief delay
-				setTimeout(() => {
-					router.push(redirect)
-				}, 1000)
+				// Redirect to callback URL after successful verification
+				router.push(callbackUrl)
 			} catch (err) {
 				console.error("Magic link verification error:", err)
 				handleError("An unexpected error occurred. Please try requesting a new magic link.")
