@@ -64,16 +64,26 @@ export const auth = {
 
 	// Sign in with magic link
 	signInWithMagicLink: async (email: string, callbackURL?: string) => {
-		const absoluteCallbackURL = toAbsoluteUrl(callbackURL || "/dashboard")
-		const newUserCallbackURL = toAbsoluteUrl("/dashboard/welcome")
+		const redirectURL = callbackURL || "/dashboard"
+		// Build the verification URL with the redirect parameter
+		const verifyURL = `/auth/magic-link/verify?redirect=${encodeURIComponent(redirectURL)}`
+		const absoluteCallbackURL = toAbsoluteUrl(verifyURL)
 		const errorCallbackURL = toAbsoluteUrl("/auth/sign-in")
-
 
 		return await authClient.signIn.magicLink({
 			email,
 			callbackURL: absoluteCallbackURL,
-			newUserCallbackURL,
 			errorCallbackURL: errorCallbackURL,
+		})
+	},
+
+	// Verify magic link token
+	verifyMagicLink: async (token: string, callbackURL?: string) => {
+		return await authClient.magicLink.verify({
+			query: {
+				token,
+				callbackURL: callbackURL || "/dashboard",
+			},
 		})
 	},
 
