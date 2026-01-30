@@ -12,7 +12,26 @@ import { Button } from "./ui/button"
 import { ScrollArea } from "./ui/scroll-area"
 
 export function MobileNav() {
+	const [mounted, setMounted] = React.useState(false)
 	const [open, setOpen] = React.useState(false)
+
+	React.useEffect(() => {
+		setMounted(true)
+	}, [])
+
+	// Render static button before mount to prevent hydration mismatch
+	if (!mounted) {
+		return (
+			<Button
+				size="icon"
+				variant="ghost"
+				className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
+			>
+				<Icons.Menu className="size-5" />
+				<span className="sr-only">Toggle Menu</span>
+			</Button>
+		)
+	}
 
 	return (
 		<Sheet open={open} onOpenChange={setOpen}>

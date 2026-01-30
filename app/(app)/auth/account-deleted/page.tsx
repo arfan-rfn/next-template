@@ -7,6 +7,7 @@ import { Icons } from "@/components/icons"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuthContext } from "@/components/providers/auth-provider"
 import { useCompleteAccountDeletion } from "@/hooks/use-account"
+import { toast } from "sonner"
 
 function AccountDeletedContent() {
   const router = useRouter()
@@ -30,6 +31,9 @@ function AccountDeletedContent() {
 
     // If not authenticated, redirect to sign-in with return URL
     if (!isAuthenticated) {
+      toast.info("Please sign in to complete account deletion", {
+        description: "For security, you must verify your identity before we can delete your account."
+      })
       const returnUrl = `/auth/account-deleted?token=${token}`
       router.push(`/auth/sign-in?callbackUrl=${encodeURIComponent(returnUrl)}`)
       return

@@ -1,11 +1,8 @@
-import Link from "next/link"
+"use client"
 
 import { siteConfig } from "@/config/site"
-import { buttonVariants } from "@/components/ui/button"
 import { AccountButton } from "@/components/account-button"
-import { Icons } from "@/components/icons"
 import { MainNav } from "@/components/main-nav"
-import { ThemeToggle } from "@/components/theme-toggle"
 import { Search } from "./search"
 import { MobileNav } from "./mobile-nav"
 

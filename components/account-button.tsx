@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useAuthContext } from "@/components/providers/auth-provider"
@@ -22,10 +23,15 @@ import { Icons } from "./icons"
  * Responsive and accessible.
  */
 export function AccountButton() {
+	const [mounted, setMounted] = useState(false)
 	const { isAuthenticated, isLoading: authLoading, signOut, refresh } = useAuthContext()
 	const { data: user, isLoading: userLoading } = useUser()
 	const { canAccess: canAccessAdmin } = useCanAccessAdmin()
 	const router = useRouter()
+
+	useEffect(() => {
+		setMounted(true)
+	}, [])
 
 	// Combined loading state
 	const isLoading = authLoading || userLoading
@@ -55,8 +61,8 @@ export function AccountButton() {
 		router.push("/auth/sign-in")
 	}
 
-	// Loading state: show skeleton
-	if (isLoading) {
+	// Loading state: show skeleton (also shown before mount to prevent hydration mismatch)
+	if (!mounted || isLoading) {
 		return (
 			<Icons.Loader className="size-9 p-1 animate-spin text-muted-foreground" />
 		)
