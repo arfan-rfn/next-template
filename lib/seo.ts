@@ -1,4 +1,5 @@
 import { env } from "@/env";
+import { siteConfig } from "@/config/site";
 import { Metadata } from "next"
 
 
@@ -17,6 +18,9 @@ export function getSEOTags(seoTags: SEOTagsParams): Metadata {
 	// Ensure the canonical URL is absolute
 	const fullUrl = `${baseUrl}${relativeUrl}`;
 
+	// Get the OG image URL - use provided imageUrl or fall back to default
+	const ogImageUrl = imageUrl || `${baseUrl}${siteConfig.seo.ogImage}`;
+
 	return {
 		metadataBase: fullUrl ? new URL(fullUrl) : null,
 		alternates: {
@@ -26,11 +30,12 @@ export function getSEOTags(seoTags: SEOTagsParams): Metadata {
 			type: 'website',
 			locale: 'en_US',
 			url: fullUrl,
+			siteName: siteConfig.name,
 			title: title,
 			description: description,
 			images: [
 				{
-					url: imageUrl || `${baseUrl}/favicon-16x16.png`,
+					url: ogImageUrl,
 					width: 1200,
 					height: 630,
 					alt: title,
@@ -54,8 +59,11 @@ export function getSEOTags(seoTags: SEOTagsParams): Metadata {
 			},
 		},
 		twitter: {
+			card: "summary_large_image",
+			site: siteConfig.seo.twitterHandle,
 			title: title,
 			description: description,
+			images: [ogImageUrl],
 		},
 		appleWebApp: {
 			title: title,

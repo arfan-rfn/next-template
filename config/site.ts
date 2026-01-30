@@ -18,6 +18,10 @@ export const siteConfig = {
     twitter: "https://twitter.com/shadcn",
     github: "https://github.com/arfan-rfn/next-template",
   },
+  seo: {
+    twitterHandle: "@yourtwitterhandle", // Replace with your actual Twitter handle
+    ogImage: "/og-image.jpg", // Default OG image (1200x630px recommended)
+  },
   // Icon must be exist in the component/icons.tsx file
   socials: [
     {
