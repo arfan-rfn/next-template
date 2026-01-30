@@ -1,6 +1,6 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueries } from "@tanstack/react-query"
 import { authClient, useSession } from "@/lib/auth"
 import { hasRole, ROLE_GROUPS } from "@/lib/constants/roles"
 
@@ -108,10 +108,10 @@ export function usePreloadPermissions(permissionList: Array<[string, string]>) {
 
 	const canAccessAdmin = hasRole(session?.user?.role, ROLE_GROUPS.ADMIN_PANEL_ACCESS)
 
-	// Fire all permission checks in parallel
+	// Fire all permission checks in parallel using useQueries
 	// They'll be cached for later use
-	permissionList.forEach(([namespace, action]) => {
-		useQuery({
+	return useQueries({
+		queries: permissionList.map(([namespace, action]) => ({
 			queryKey: ['permission', namespace, action],
 			queryFn: async () => {
 				const result = await authClient.admin.hasPermission({
@@ -125,6 +125,6 @@ export function usePreloadPermissions(permissionList: Array<[string, string]>) {
 			staleTime: 5 * 60 * 1000,
 			gcTime: 10 * 60 * 1000,
 			enabled: canAccessAdmin,
-		})
+		})),
 	})
 }
