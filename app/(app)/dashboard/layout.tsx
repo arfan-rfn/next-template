@@ -1,9 +1,8 @@
 "use client"
 
-import { ReactNode, useEffect } from "react"
+import { ReactNode, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
-import { Icons } from "@/components/icons"
 import { ProfileSkeleton } from "@/components/ui/skeletons"
 
 interface DashboardLayoutProps {
@@ -19,15 +18,22 @@ export default function DashboardLayout({
 }: DashboardLayoutProps) {
   const { isAuthenticated, isLoading } = useAuth()
   const router = useRouter()
+  const [hasMounted, setHasMounted] = useState(false)
+
+  // Track when component has mounted to avoid hydration mismatch
+  useEffect(() => {
+    setHasMounted(true)
+  }, [])
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (hasMounted && !isLoading && !isAuthenticated) {
       router.push("/auth/sign-in")
     }
-  }, [isAuthenticated, router, isLoading])
+  }, [isAuthenticated, router, isLoading, hasMounted])
 
-  // Show loading state while checking authentication
-  if (isLoading) {
+  // Show skeleton during SSR and initial hydration to ensure consistency
+  // This prevents hydration mismatch by rendering the same content on server and client
+  if (!hasMounted || isLoading) {
     return <ProfileSkeleton />
   }
 

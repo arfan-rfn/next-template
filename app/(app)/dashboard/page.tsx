@@ -5,27 +5,30 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuth } from "@/hooks/use-auth"
 import { useUser } from "@/hooks/use-user"
 import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { Icons } from "@/components/icons"
 import { ProfileSkeleton } from "@/components/ui/skeletons"
 
 export default function DashboardPage() {
-  const { isAuthenticated, isLoading: authLoading } = useAuth()
+  const { isAuthenticated } = useAuth()
   const { data: user, isLoading: userLoading } = useUser()
   const router = useRouter()
+  const [hasMounted, setHasMounted] = useState(false)
 
-  // Combined loading state
-  const isLoading = authLoading || userLoading
-
+  // Track when component has mounted to avoid hydration mismatch
+  useEffect(() => {
+    setHasMounted(true)
+  }, [])
 
   // Show welcome modal for users with incomplete profiles
   useEffect(() => {
-    if (user && !user.profileCompleted && isAuthenticated && !isLoading) {
+    if (hasMounted && user && !user.profileCompleted && isAuthenticated) {
       router.push('/dashboard/welcome')
     }
-  }, [user, isAuthenticated, isLoading, router])
+  }, [user, isAuthenticated, router, hasMounted])
 
-  if (isLoading) {
+  // Show skeleton during SSR/hydration and while loading user data
+  if (!hasMounted || userLoading) {
     return <ProfileSkeleton />
   }
 
